@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>It's Just Logic</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--cell:min(calc((100vw - 487px)/12),calc((100vh - 160px)/12))}
+body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.app{display:flex;flex-direction:column;height:100vh;animation:fadeIn .45s ease}
+.main{display:flex;flex:1;overflow:hidden}
+
+/* LEFT */
+.grid-area{flex:1;display:flex;flex-direction:column;padding:10px 8px 10px 12px;min-width:0}
+.grid-controls{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-shrink:0}
+.res-counter{display:flex;gap:10px;margin-bottom:8px;flex-shrink:0;align-items:center}
+.res-pill{display:flex;align-items:center;gap:5px;background:#080814;border:1px solid #1a1a30;border-radius:4px;padding:4px 10px;font-size:12px;font-weight:bold}
+.res-pill-lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px}
+.res-cr{color:#33aa33;border-color:#1a3a1a}
+.res-br{color:#cc3333;border-color:#3a1a1a}
+.res-sr{color:#4444cc;border-color:#1a1a3a}
+.view-title{font-size:13px;font-weight:bold;color:#8888ff;margin-right:2px;min-width:90px}
+.grid-scroll{overflow:auto;flex:1}
+.grid-wrap{display:inline-block}
+.col-labels{display:flex;margin-left:26px;margin-bottom:2px}
+.col-lbl{width:var(--cell);text-align:center;font-size:10px;color:#444;font-weight:bold;letter-spacing:1px}
+.grid-row{display:flex;align-items:center}
+.row-lbl{width:26px;height:var(--cell);font-size:10px;color:#444;text-align:right;padding-right:4px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end}
+
+/* CELLS */
+.cell{width:var(--cell);height:var(--cell);flex-shrink:0;border:1px solid #161624;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;position:relative;transition:background .1s,border-color .1s;user-select:none}
+.c-empty{background:#0b0b18}
+.c-starting{background:#b8860b;border-color:#e0a800}
+.c-territory{background:#0c3838;border-color:#186060}
+.c-cr{background:#0c2c0c;border-color:#185018}
+.c-cr.done{background:#070f07;border-color:#0c160c;opacity:.45}
+.c-br{background:#2c0c0c;border-color:#501818}
+.c-br.done{background:#0f0707;border-color:#160c0c;opacity:.45}
+.c-srr{background:#0c0c2c;border-color:#181850}
+.c-srr.done{background:#07070f;border-color:#0c0c16;opacity:.45}
+.c-hit-blank{background:#0b0b18}
+.c-hit-miss{background:#141414;border-color:#282828}
+.c-hit-cr{background:#0c2c0c;border-color:#287028}
+.c-hit-br{background:#2c0c0c;border-color:#702828}
+.c-hit-sr{background:#0c0c2c;border-color:#282870}
+.c-hit-ter{background:#2c280c;border-color:#706018}
+.c-valid{background:#081808!important;border-color:#22cc22!important;cursor:pointer!important}
+.c-valid:hover{background:#122812!important;box-shadow:inset 0 0 10px rgba(34,204,34,.25)}
+.c-ghost-valid{background:#1a1500!important;border-color:#ffee00!important;cursor:pointer!important}
+.c-ghost-valid:hover{background:#252000!important}
+.c-ghost-invalid{background:#0d0a00!important;border-color:#221a00!important;cursor:not-allowed!important}
+.c-station-pick{background:#14082a!important;border-color:#7722cc!important;cursor:pointer!important}
+.c-station-pick:hover{background:#1e0e3a!important;box-shadow:inset 0 0 10px rgba(170,68,255,.2)}
+.c-station-sel{background:#220a3a!important;border-color:#cc66ff!important;cursor:pointer!important}
+
+.cell-x{font-size:15px;font-weight:bold;line-height:1}
+.cell-sub{font-size:7px;color:rgba(255,255,255,.55);line-height:1;margin-top:1px}
+.cell-icon{font-size:13px;line-height:1}
+.x-miss{color:#444}
+.x-cr{color:#44cc44}
+.x-br{color:#cc4444}
+.x-sr{color:#4444cc}
+.x-ter{color:#ccaa22}
+
+/* MID PANEL */
+.mid{width:290px;background:#09090f;border-left:1px solid #14141e;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.mid-head{padding:9px 12px 5px;font-size:11px;color:#8888aa;text-transform:uppercase;letter-spacing:1px;flex-shrink:0;border-bottom:1px solid #1a1a28}
+.log-list{flex:0 1 auto;max-height:55%;overflow-y:auto;padding:4px 0}
+.log-entry{font-size:11px;padding:5px 12px;border-bottom:1px solid #0f0f18;line-height:1.5;word-break:break-word}
+.log-empty{font-size:11px;color:#555;font-style:italic;padding:8px 12px}
+.log-you{color:#99bbff}
+.log-opp{color:#ffaa77}
+.log-p2{color:#ff9944}
+.log-who{font-weight:bold;font-size:10px;letter-spacing:.5px;margin-right:5px}
+.notes-wrap{flex:1;display:flex;flex-direction:column;border-top:1px solid #1a1a28;min-height:0}
+.notes-inp{flex:1;background:transparent;border:none;color:#ccc;font-family:'Courier New',monospace;font-size:12px;padding:10px 12px;resize:none;outline:none;line-height:1.6}
+.notes-inp::placeholder{color:#444}
+
+/* RIGHT PANEL */
+.right{width:210px;background:#0c0c18;border-left:1px solid #1a1a2a;padding:14px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex-shrink:0}
+.stat-card{background:#080814;border:1px solid #1a1a30;border-radius:6px;padding:10px 12px}
+.stat-name{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.stat-val{font-size:28px;font-weight:bold}
+.sv-ter{color:#3aacac}
+.sv-sr{color:#7777ff}
+.sec-head{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.inv-empty{font-size:11px;color:#2a2a2a;font-style:italic}
+.inv-item{background:#080814;border:1px solid #1a1a28;border-radius:4px;padding:7px 8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.inv-item.sel{border-color:#4040aa;background:#0c0c20}
+.inv-name{font-size:11px;color:#bbc}
+
+/* BUTTONS */
+.btn{padding:6px 12px;border-radius:4px;border:1px solid #24243a;background:#121226;color:#bbc;cursor:pointer;font-family:inherit;font-size:12px;font-weight:bold;letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+.btn:hover{background:#1c1c38;border-color:#3a3a5a}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-view{padding:5px 10px;font-size:11px}
+.btn-view.on{background:#181848;border-color:#4040aa;color:#8888ff}
+.btn-shop{background:#181410;border-color:#3a3210;color:#aaaa44;width:100%}
+.btn-shop:hover{background:#22201a;border-color:#5a5218}
+.btn-search{background:#0a1824;border-color:#1a4466;color:#55aaff;font-size:14px;padding:9px 28px}
+.btn-search:hover{background:#102032;border-color:#2a6088}
+.btn-attack{background:#24080a;border-color:#661820;color:#ff5566;font-size:14px;padding:9px 28px}
+.btn-attack:hover{background:#300c10;border-color:#882030}
+.btn-go{background:#082408;border-color:#206620;color:#44cc44;font-size:14px;padding:9px 20px}
+.btn-go:hover{background:#0c320c}
+.btn-cancel{background:#141414;border-color:#303030;color:#666;font-size:14px;padding:9px 14px}
+.btn-cancel:hover{background:#1e1e1e}
+.btn-buy{padding:5px 10px;font-size:11px;background:#082408;border-color:#206620;color:#44cc44}
+.btn-buy:disabled{background:#101010;border-color:#1c1c1c;color:#333}
+.btn-sel{padding:4px 8px;font-size:10px}
+.btn-sel.on{background:#14143a;border-color:#4040aa;color:#8888ff}
+
+/* BOTTOM */
+.bottom{background:#0c0c18;border-top:1px solid #1a1a2a;padding:8px 14px;display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.bottom-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.action-form{display:flex;align-items:center;gap:8px;background:#080814;border:1px solid #22223a;border-radius:4px;padding:6px 14px}
+.action-lbl{font-size:14px;color:#666}
+.coord-inp{background:transparent;border:none;color:#ccddff;font-family:inherit;font-size:16px;font-weight:bold;width:60px;outline:none;text-transform:uppercase}
+.err-txt{color:#ff4444;font-size:11px}
+.msg-txt{color:#8888ff;font-size:11px;padding:2px 0}
+.place-banner{background:#081808;border:1px solid #206620;border-radius:4px;padding:6px 12px;color:#44cc44;font-size:12px;font-weight:bold}
+.sel-banner{background:#08081e;border:1px solid #202066;border-radius:4px;padding:6px 12px;color:#8888ff;font-size:11px}
+
+/* START SCREEN */
+.start-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:32px;animation:fadeIn .4s ease}
+.start-title{font-size:48px;font-weight:bold;color:#8888ff;letter-spacing:4px;text-transform:uppercase}
+.start-sub{font-size:13px;color:#333;letter-spacing:3px;text-transform:uppercase;margin-top:6px;text-align:center}
+.btn-start{font-size:16px;padding:14px 48px;letter-spacing:2px;background:#0a0a20;border:1px solid #3a3a88;color:#8888ff;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:bold;text-transform:uppercase;transition:all .2s;min-width:220px}
+.btn-start:hover{background:#14143a;border-color:#6666cc;color:#aaaaff;box-shadow:0 0 24px rgba(100,100,255,.15)}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:18px;animation:fadeIn .25s ease}
+
+/* TOAST */
+.toast-wrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:500;pointer-events:none}
+.toast{background:#0e0e1c;border:1px solid #24243a;border-radius:6px;padding:8px 20px;font-size:12px;color:#ddd;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.75);animation:t-in .15s ease forwards}
+@keyframes t-in{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:200}
+.modal{background:#0c0c1a;border:1px solid #24244a;border-radius:8px;padding:20px;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.modal-title{font-size:16px;font-weight:bold;color:#aaaa44}
+.modal-sub{font-size:11px;color:#444;margin-top:2px}
+.modal-close{background:none;border:none;color:#444;cursor:pointer;font-size:20px;line-height:1;padding:0}
+.modal-close:hover{color:#aaa}
+.shop-item{background:#08080e;border:1px solid #1a1a30;border-radius:6px;padding:12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.shop-body{flex:1}
+.shop-name{font-size:13px;font-weight:bold;color:#dde}
+.shop-cost{font-size:11px;color:#7777ff;margin:2px 0 5px}
+.shop-desc{font-size:11px;color:#666;line-height:1.45}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback, useRef, useEffect } = React;
+
+const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+const SHOP_ITEMS = [
+  { id:'emp',     name:'EMP',                cost:1, desc:"Blocks opponent's next turn; you get an extra move immediately." },
+  { id:'shield',  name:'Shield',             cost:1, desc:"Protect one territory tile. If the enemy searches it, they see a miss instead." },
+  { id:'pirates', name:'Pirates',            cost:3, desc:"Steal 1 territory tile from the opponent. If they have only 1 tile, they lose." },
+  { id:'laser',   name:'Laser Ablation',     cost:2, desc:"Destroys any tile on either grid. 2 uses per game. Wasted on empty tiles." },
+  { id:'station', name:'Space Station',      cost:3, desc:"Move 1–3 of your tiles anywhere on your grid. Acts as a decoy. Once per game." },
+  { id:'torpedo', name:'Antimatter Torpedo', cost:7, desc:"3x3 blast. Center hits territory = instant win. Outer ring destroys what it hits." },
+];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function inBounds(r,c){ return r>=0&&r<12&&c>=0&&c<12; }
+
+function ortho(r,c){
+  return [[-1,0],[1,0],[0,-1],[0,1]].map(([dr,dc])=>[r+dr,c+dc]).filter(([nr,nc])=>inBounds(nr,nc));
+}
+
+function allAdj(r,c){
+  const out=[];
+  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++)
+    if((dr||dc)&&inBounds(r+dr,c+dc)) out.push([r+dr,c+dc]);
+  return out;
+}
+
+function mkCell(type='empty'){ return {type,collected:false,opponentSearched:false}; }
+function cloneGrid(g){ return g.map(row=>row.map(c=>({...c}))); }
+
+// ── Grid Generation ──────────────────────────────────────────────────────────
+
+function generateGrid(){
+  const grid = Array.from({length:12},()=>Array.from({length:12},()=>mkCell()));
+
+  // Starting square: not within 2 of edge → indices 2–9
+  const ssR = 2 + Math.floor(Math.random()*8);
+  const ssC = 2 + Math.floor(Math.random()*8);
+  grid[ssR][ssC] = mkCell('starting');
+
+  const inExcl = (r,c) => Math.abs(r-ssR)<=2 && Math.abs(c-ssC)<=2;
+  const adjTypes = (r,c,types) => allAdj(r,c).some(([nr,nc])=>types.includes(grid[nr][nc].type));
+
+  // 20 CRs — no two adjacent to each other
+  let placed=0, tries=0;
+  while(placed<20 && tries<200000){
+    tries++;
+    const r=Math.floor(Math.random()*12), c=Math.floor(Math.random()*12);
+    if(grid[r][c].type!=='empty') continue;
+    if(inExcl(r,c)) continue;
+    if(adjTypes(r,c,['cr'])) continue;
+    grid[r][c]=mkCell('cr');
+    placed++;
+  }
+
+  const adjTerOrCR = (r,c) => allAdj(r,c).some(([nr,nc])=>['starting','territory','cr'].includes(grid[nr][nc].type));
+
+  // 4 BRs
+  placed=0; tries=0;
+  while(placed<4 && tries<200000){
+    tries++;
+    const r=Math.floor(Math.random()*12), c=Math.floor(Math.random()*12);
+    if(grid[r][c].type!=='empty') continue;
+    if(inExcl(r,c)) continue;
+    if(adjTerOrCR(r,c)) continue;
+    grid[r][c]=mkCell('br');
+    placed++;
+  }
+
+  // 10 SRs
+  placed=0; tries=0;
+  while(placed<10 && tries<200000){
+    tries++;
+    const r=Math.floor(Math.random()*12), c=Math.floor(Math.random()*12);
+    if(grid[r][c].type!=='empty') continue;
+    if(inExcl(r,c)) continue;
+    if(adjTerOrCR(r,c)) continue;
+    grid[r][c]=mkCell('sr_res');
+    placed++;
+  }
+
+  return {grid,ssR,ssC};
+}
+
+// ── Coordinate Parsing ───────────────────────────────────────────────────────
+
+function parseCoord(input){
+  const m=(input||'').trim().toUpperCase().match(/^([A-L])(\d{1,2})$/);
+  if(!m) return null;
+  const col=m[1].charCodeAt(0)-65;
+  const row=parseInt(m[2])-1;
+  if(row<0||row>11) return null;
+  return {row,col};
+}
+
+// ── Placement Helpers ─────────────────────────────────────────────────────────
+
+function validPlacements(grid){
+  const s=new Set();
+  for(let r=0;r<12;r++) for(let c=0;c<12;c++){
+    const t=grid[r][c].type;
+    if(t==='territory'||t==='starting'){
+      ortho(r,c).forEach(([nr,nc])=>{
+        const nc_=grid[nr][nc];
+        if(nc_.type==='empty'||(nc_.type==='cr'&&nc_.collected))
+          s.add(`${nr},${nc}`);
+      });
+    }
+  }
+  return s;
+}
+
+function autoExpandCRs(grid){
+  const found=new Set();
+  for(let r=0;r<12;r++) for(let c=0;c<12;c++){
+    const t=grid[r][c].type;
+    if(t==='territory'||t==='starting'){
+      ortho(r,c).forEach(([nr,nc])=>{
+        const nc_=grid[nr][nc];
+        if(nc_.type==='cr'&&!nc_.collected) found.add(`${nr},${nc}`);
+      });
+    }
+  }
+  return [...found].map(k=>k.split(',').map(Number));
+}
+
+// ── AI Helpers ────────────────────────────────────────────────────────────────
+
+function autoPlaceAiTerritory(grid,count){
+  let g=cloneGrid(grid);
+  let remaining=count;
+  while(remaining>0){
+    const vp=validPlacements(g);
+    const options=[...vp].map(k=>k.split(',').map(Number));
+    if(!options.length) break;
+    const [r,c]=options[Math.floor(Math.random()*options.length)];
+    g[r][c]={...g[r][c],type:'territory',collected:false};
+    const toCollect=autoExpandCRs(g);
+    toCollect.forEach(([cr,cc])=>{g[cr][cc]={...g[cr][cc],collected:true};});
+    remaining=remaining-1+toCollect.length;
+  }
+  return g;
+}
+
+function applyAiSearch(state,row,col,destroy=false){
+  const isShielded=(state.shieldedCells||[]).some(s=>s.r===row&&s.c===col);
+  if(isShielded){
+    const newHG=state.aiHitGrid.map(r=>[...r]);
+    newHG[row][col]={result:'miss'};
+    const newShielded=state.shieldedCells.filter(s=>!(s.r===row&&s.c===col));
+    return {state:{...state,aiHitGrid:newHG,shieldedCells:newShielded},result:'miss',msg:`Searched ${COLS[col]}${row+1} — Miss.`};
+  }
+  const cell=state.yourGrid[row][col];
+  const result=
+    cell.type==='cr'&&!cell.collected?'cr':
+    cell.type==='br'&&!cell.collected?'br':
+    cell.type==='sr_res'&&!cell.collected?'sr':
+    (cell.type==='starting'||cell.type==='territory')?'territory':'miss';
+  const newHG=state.aiHitGrid.map(r=>[...r]);
+  newHG[row][col]={result};
+  const newYG=cloneGrid(state.yourGrid);
+  if(result==='cr'||result==='br'||result==='sr')
+    newYG[row][col]={...newYG[row][col],collected:true};
+  let territory=state.territory;
+  if(destroy&&result==='territory'&&cell.type!=='starting'){
+    newYG[row][col]=mkCell('empty');
+    territory=Math.max(0,territory-1);
+  }
+  let {aiTerritory,aiSr,aiOwnGrid}=state;
+  if(result==='cr'){aiTerritory++;aiOwnGrid=autoPlaceAiTerritory(aiOwnGrid,1);}
+  else if(result==='br'){aiTerritory+=7;aiOwnGrid=autoPlaceAiTerritory(aiOwnGrid,7);}
+  else if(result==='sr'){aiSr++;}
+  const msg=result==='miss'?`Searched ${COLS[col]}${row+1} — Miss.`:
+    result==='cr'?`CR found at ${COLS[col]}${row+1}! Placed 1 territory.`:
+    result==='br'?`BR found at ${COLS[col]}${row+1}! Placed 7 territory.`:
+    result==='sr'?`SR found at ${COLS[col]}${row+1}! SR +1.`:
+    `Hit your territory at ${COLS[col]}${row+1}!`;
+  return {state:{...state,aiHitGrid:newHG,yourGrid:newYG,aiTerritory,aiSr,aiOwnGrid,territory},result,msg};
+}
+
+function pickAiTarget(state){
+  const {aiDifficulty,aiHitGrid,aiTargetQueue}=state;
+  if(aiDifficulty!=='easy'){
+    for(const [r,c] of aiTargetQueue)
+      if(aiHitGrid[r][c]===null) return [r,c];
+  }
+  if(aiDifficulty==='hard'){
+    const pool=[];
+    for(let r=0;r<12;r++) for(let c=0;c<12;c++)
+      if(aiHitGrid[r][c]===null&&(r+c)%2===0) pool.push([r,c]);
+    if(pool.length) return pool[Math.floor(Math.random()*pool.length)];
+  }
+  const pool=[];
+  for(let r=0;r<12;r++) for(let c=0;c<12;c++)
+    if(aiHitGrid[r][c]===null) pool.push([r,c]);
+  return pool.length?pool[Math.floor(Math.random()*pool.length)]:null;
+}
+
+function doAiItems(state){
+  if(state.aiDifficulty==='easy') return {state,logs:[]};
+  let s=state;
+  const logs=[];
+
+  // Buy one item per turn
+  let bought=null;
+  if(s.aiDifficulty==='medium'){
+    for(const id of ['pirates','emp']){
+      const item=SHOP_ITEMS.find(i=>i.id===id);
+      if(s.aiSr>=item.cost){bought=item;break;}
+    }
+  } else {
+    for(const id of ['torpedo','pirates','laser','emp']){
+      const item=SHOP_ITEMS.find(i=>i.id===id);
+      if(s.aiSr>=item.cost){bought=item;break;}
+    }
+  }
+  if(bought) s={...s,aiSr:s.aiSr-bought.cost,aiInventory:[...s.aiInventory,{...bought,iid:Date.now()+Math.random()}]};
+
+  // Use all items in inventory
+  const toUse=[...s.aiInventory];
+  s={...s,aiInventory:[]};
+  for(const item of toUse){
+    if(item.id==='emp'){
+      s={...s,playerStunned:true};
+      logs.push({who:'ai',text:'Used EMP — your next turn is stunned!'});
+    } else if(item.id==='pirates'){
+      const t=Math.max(0,s.territory-1);
+      s={...s,territory:t,gameOver:t===0||s.gameOver,winner:t===0?'ai':s.winner};
+      logs.push({who:'ai',text:`Used Pirates — stole 1 territory tile. Your territory: ${t}${t===0?' — YOU LOSE!':''}`});
+      if(t===0) return {state:s,logs};
+    } else if(item.id==='laser'){
+      const tgt=pickAiTarget(s);
+      if(tgt){
+        const aiBase=`${COLS[s.aiSsC]}${s.aiSsR+1}`;
+        const {state:ns,msg}=applyAiSearch(s,tgt[0],tgt[1],true);
+        s=ns;
+        logs.push({who:'ai',text:`Laser from ${aiBase}: ${msg}`});
+      }
+    } else if(item.id==='torpedo'){
+      const centers=[];
+      for(let r=1;r<11;r++) for(let c=1;c<11;c++){
+        let cnt=0;
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++)
+          if(s.aiHitGrid[r+dr][c+dc]===null) cnt++;
+        if(cnt>0) centers.push({r,c,cnt});
+      }
+      if(centers.length){
+        centers.sort((a,b)=>b.cnt-a.cnt);
+        const {r:cr,c:cc}=centers[0];
+        const aiBase=`${COLS[s.aiSsC]}${s.aiSsR+1}`;
+        // Center cell: if it hits territory/starting → instant win
+        if(s.aiHitGrid[cr][cc]===null){
+          const centerCell=s.yourGrid[cr][cc];
+          if(centerCell.type==='territory'||centerCell.type==='starting'){
+            const newHG=s.aiHitGrid.map(r=>[...r]);
+            newHG[cr][cc]={result:'territory'};
+            s={...s,aiHitGrid:newHG,gameOver:true,winner:'ai'};
+            logs.push({who:'ai',text:`Torpedo from ${aiBase} — center hit at ${COLS[cc]}${cr+1}! Game over.`});
+            return {state:s,logs};
+          }
+        }
+        const hits=[];
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const tr=cr+dr,tc=cc+dc;
+          const isCenter=dr===0&&dc===0;
+          if(!inBounds(tr,tc)||s.aiHitGrid[tr][tc]!==null) continue;
+          const {state:ns,result}=applyAiSearch(s,tr,tc,!isCenter);
+          s=ns;
+          if(result!=='miss') hits.push(`${COLS[tc]}${tr+1}`);
+        }
+        logs.push({who:'ai',text:`Torpedo from ${aiBase} at ${COLS[cc]}${cr+1}! Hits: ${hits.length?hits.join(', '):'none'}.`});
+      }
+    }
+  }
+  return {state:s,logs};
+}
+
+function doAiMove(prev){
+  if(prev.aiStunned){
+    return {...prev,aiStunned:false,turn:'you',
+      log:[{who:'ai',text:'AI was stunned by EMP — turn skipped.'},...prev.log],
+      pendingToast:{text:'AI stunned — turn skipped!',color:'#ffaa00'}};
+  }
+  const {state:s1,logs:itemLogs}=doAiItems(prev);
+  if(s1.gameOver) return {...s1,turn:'you',log:[...itemLogs,...prev.log],pendingToast:{text:'AI wins! Game over.',color:'#cc4444'}};
+  const target=pickAiTarget(s1);
+  if(!target) return {...s1,turn:'you',log:[...itemLogs,...prev.log]};
+  const {state:s2,result,msg}=applyAiSearch(s1,target[0],target[1]);
+  let aiTargetQueue=s2.aiTargetQueue;
+  if(s2.aiDifficulty!=='easy'){
+    aiTargetQueue=aiTargetQueue.filter(([r,c])=>s2.aiHitGrid[r][c]===null);
+    if(result!=='miss'){
+      const ex=new Set(aiTargetQueue.map(([r,c])=>`${r},${c}`));
+      for(const [nr,nc] of ortho(target[0],target[1]))
+        if(s2.aiHitGrid[nr][nc]===null&&!ex.has(`${nr},${nc}`))
+          aiTargetQueue.push([nr,nc]);
+    }
+  }
+  const aiColor=result==='miss'?'#554433':result==='cr'?'#cc6633':result==='br'?'#cc3333':result==='sr'?'#5555aa':'#cc8833';
+  return {...s2,aiTargetQueue,turn:'you',log:[{who:'ai',text:msg},...itemLogs,...prev.log],pendingToast:{text:'AI made a move.',color:'#554433'}};
+}
+
+// ── PvP Swap ──────────────────────────────────────────────────────────────────
+
+function swapPvpPlayers(prev){
+  const {p2}=prev;
+  const snap={
+    yourGrid:prev.yourGrid,
+    opponentGrid:prev.opponentGrid,
+    hitGrid:prev.hitGrid,
+    ssR:prev.ssR,ssC:prev.ssC,
+    territory:prev.territory,
+    sr:prev.sr,
+    inventory:prev.inventory,
+    selectedItem:prev.selectedItem,
+    placementMode:prev.placementMode,
+    placementRemaining:prev.placementRemaining,
+    stationUsed:prev.stationUsed,
+    stationMode:false,stationPicks:[],
+    shieldMode:false,shieldedCells:prev.shieldedCells,
+  };
+  return {
+    ...prev,
+    yourGrid:p2.yourGrid,
+    opponentGrid:p2.opponentGrid,
+    hitGrid:p2.hitGrid,
+    ssR:p2.ssR,ssC:p2.ssC,
+    territory:p2.territory,
+    sr:p2.sr,
+    inventory:p2.inventory,
+    selectedItem:p2.selectedItem,
+    placementMode:p2.placementMode,
+    placementRemaining:p2.placementRemaining,
+    stationUsed:p2.stationUsed,
+    stationMode:p2.stationMode||false,
+    stationPicks:p2.stationPicks||[],
+    shieldMode:p2.shieldMode||false,
+    shieldedCells:p2.shieldedCells||[],
+    p2:snap,
+    activeAction:null,actionInput:'',actionError:'',actionMessage:'',
+    activePlayer:prev.activePlayer===1?2:1,
+    pvpPendingPass:false,
+    playerStunned:prev.opponentStunned,
+    opponentStunned:false,
+    turn:'you',
+    viewMode:p2.placementMode?'your':'hit',
+  };
+}
+
+// ── Initial State ─────────────────────────────────────────────────────────────
+
+function initGame(mode=false){
+  const {grid,ssR,ssC}=generateGrid();
+  const pvpMode=mode==='1v1';
+  const aiOn=!!mode&&!pvpMode;
+  const {grid:opponentGrid,ssR:opponentSsR,ssC:opponentSsC}=generateGrid();
+  const {grid:aiOwnGrid,ssR:aiSsR,ssC:aiSsC}=generateGrid();
+  let p2=null;
+  if(pvpMode){
+    const {grid:p2Grid,ssR:p2SsR,ssC:p2SsC}=generateGrid();
+    p2={
+      yourGrid:p2Grid,
+      opponentGrid:grid.map(r=>r.map(c=>({...c}))),
+      hitGrid:Array.from({length:12},()=>Array(12).fill(null)),
+      ssR:p2SsR,ssC:p2SsC,
+      territory:1,sr:0,inventory:[],selectedItem:null,
+      placementMode:false,placementRemaining:0,
+      stationUsed:false,stationMode:false,stationPicks:[],
+      shieldMode:false,shieldedCells:[],
+    };
+  }
+  return {
+    yourGrid: grid,
+    opponentGrid: pvpMode?p2.yourGrid:opponentGrid,
+    hitGrid: Array.from({length:12},()=>Array(12).fill(null)),
+    viewMode: 'your',
+    territory: 1,
+    sr: 0,
+    inventory: [],
+    placementMode: false,
+    placementRemaining: 0,
+    activeAction: null,
+    actionInput: '',
+    actionError: '',
+    actionMessage: '',
+    shopOpen: false,
+    selectedItem: null,
+    ssR, ssC, opponentSsR, opponentSsC, aiSsR, aiSsC,
+    log: [],
+    aiMode: aiOn, aiDifficulty: aiOn?mode:null,
+    turn: 'you',
+    aiHitGrid: Array.from({length:12},()=>Array(12).fill(null)),
+    aiTerritory: 1,
+    aiSr: 0,
+    aiOwnGrid, aiInventory: [], aiTargetQueue: [],
+    aiStunned: false, playerStunned: false,
+    stationMode: false, stationPicks: [], stationUsed: false,
+    pendingToast: null,
+    gameOver: false, winner: null,
+    shieldedCells: [], shieldMode: false,
+    pvpMode, activePlayer: pvpMode?1:null, p2, pvpPendingPass: false, opponentStunned: false,
+  };
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+
+function App(){
+  const [phase,setPhase]=useState('start');
+  const [pendingDiff,setPendingDiff]=useState(null);
+  const [gs,setGs]=useState(()=>initGame());
+  const inputRef=useRef(null);
+  const [hoverCell,setHoverCell]=useState(null);
+  const [notes,setNotes]=useState('');
+  const [toasts,setToasts]=useState([]);
+  const [timeLeft,setTimeLeft]=useState(120);
+  const timerRef=useRef(null);
+  const [pvpLoading,setPvpLoading]=useState(false);
+  const [pvpCountdown,setPvpCountdown]=useState(5);
+  const pvpCountRef=useRef(null);
+
+  const addToast=useCallback((text,color='#aaaacc')=>{
+    const id=Date.now()+Math.random();
+    setToasts(prev=>[...prev,{id,text,color}]);
+    setTimeout(()=>setToasts(prev=>prev.filter(t=>t.id!==id)),2600);
+  },[]);
+
+  const startGame=useCallback((aiMode)=>{
+    setGs(initGame(aiMode));
+    setPhase('game');
+  },[]);
+
+  const chooseAi=useCallback((diff)=>{
+    setPendingDiff(diff);
+    setPhase('loading');
+    setTimeout(()=>{
+      setGs(initGame(diff));
+      setPhase('game');
+    },550);
+  },[]);
+
+  const startPvp=useCallback(()=>{
+    setPhase('loading');
+    setTimeout(()=>{
+      setGs(initGame('1v1'));
+      setPhase('game');
+    },550);
+  },[]);
+
+  const passPvp=useCallback(()=>{
+    setPvpLoading(true);
+    setPvpCountdown(5);
+    pvpCountRef.current=setInterval(()=>{
+      setPvpCountdown(prev=>{
+        if(prev<=1){
+          clearInterval(pvpCountRef.current);
+          setGs(g=>swapPvpPlayers(g));
+          setPvpLoading(false);
+          return 5;
+        }
+        return prev-1;
+      });
+    },1000);
+  },[]);
+
+  useEffect(()=>{
+    if(!gs.pendingToast) return;
+    addToast(gs.pendingToast.text,gs.pendingToast.color);
+    setGs(prev=>({...prev,pendingToast:null}));
+  },[gs.pendingToast]);
+
+  useEffect(()=>{
+    if(gs.activeAction && inputRef.current) inputRef.current.focus();
+  },[gs.activeAction]);
+
+  useEffect(()=>{
+    if(!gs.aiMode||gs.turn!=='ai'||gs.gameOver) return;
+    const t=setTimeout(()=>setGs(prev=>doAiMove(prev)),5000);
+    return ()=>clearTimeout(t);
+  },[gs.turn,gs.aiMode,gs.gameOver]);
+
+  useEffect(()=>{
+    clearInterval(timerRef.current);
+    if(phase!=='game'||gs.turn!=='you'||gs.gameOver||gs.pvpMode) return;
+    setTimeLeft(120);
+    timerRef.current=setInterval(()=>{
+      setTimeLeft(prev=>{
+        if(prev<=1){
+          clearInterval(timerRef.current);
+          setGs(g=>{
+            if(g.gameOver||g.turn!=='you') return g;
+            return {...g,gameOver:true,winner:'ai',
+              log:[{who:'you',text:'Time ran out!'},...g.log],
+              pendingToast:{text:'Time ran out — you lose!',color:'#cc4444'}};
+          });
+          return 0;
+        }
+        return prev-1;
+      });
+    },1000);
+    return ()=>clearInterval(timerRef.current);
+  },[gs.turn,gs.gameOver,phase,gs.pvpMode]);
+
+  // Place a territory tile
+  const placeTile=useCallback((r,c)=>{
+    setGs(prev=>{
+      if(!prev.placementMode||prev.placementRemaining<=0) return prev;
+      if(prev.aiMode&&prev.turn==='ai') return prev;
+      const vp=validPlacements(prev.yourGrid);
+      if(!vp.has(`${r},${c}`)) return prev;
+
+      const g=cloneGrid(prev.yourGrid);
+      g[r][c]={...g[r][c],type:'territory',collected:false};
+
+      // Auto-expand: collect adjacent uncollected CRs
+      const toCollect=autoExpandCRs(g);
+      toCollect.forEach(([cr,cc])=>{ g[cr][cc]={...g[cr][cc],collected:true}; });
+
+      const remaining=prev.placementRemaining-1+toCollect.length;
+      const toastText=remaining>0?`Territory placed! ${remaining} tile${remaining!==1?'s':''} left.`:'All territory placed!';
+      let newP2=prev.p2;
+      if(prev.pvpMode&&prev.p2){
+        const p2OppGrid=prev.p2.opponentGrid.map(row=>row.map(c=>({...c})));
+        if(!p2OppGrid[r][c].collected) p2OppGrid[r][c]={...p2OppGrid[r][c],type:'territory'};
+        toCollect.forEach(([cr,cc])=>{
+          if(p2OppGrid[cr][cc].type==='cr'&&!p2OppGrid[cr][cc].collected)
+            p2OppGrid[cr][cc]={...p2OppGrid[cr][cc],collected:true};
+        });
+        newP2={...prev.p2,opponentGrid:p2OppGrid};
+      }
+      return {
+        ...prev,
+        yourGrid: g,
+        territory: prev.territory+1,
+        placementMode: remaining>0,
+        placementRemaining: remaining,
+        viewMode: remaining>0?'your':prev.viewMode,
+        pendingToast:{text:toastText,color:'#3aacac'},
+        p2: newP2,
+        pvpPendingPass: prev.pvpMode&&remaining===0,
+      };
+    });
+  },[]);
+
+  // Search
+  const submitSearch=useCallback(()=>{
+    setGs(prev=>{
+      if(prev.playerStunned){
+        return {...prev,playerStunned:false,activeAction:null,actionInput:'',actionError:'',
+          turn:prev.aiMode?'ai':'you',
+          pvpPendingPass:prev.pvpMode,
+          log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:'Stunned by EMP — turn lost!'},...prev.log],
+          pendingToast:{text:'Stunned! Turn lost.',color:'#ff6600'}};
+      }
+      const coord=parseCoord(prev.actionInput);
+      if(!coord) return {...prev,actionError:'Invalid. Use A1–L12 (e.g. D4)'};
+      const {row,col}=coord;
+      if(prev.pvpMode){
+        const shielded=(prev.p2?.shieldedCells||[]).some(s=>s.r===row&&s.c===col);
+        if(shielded){
+          const newHit=prev.hitGrid.map(r=>[...r]);
+          newHit[row][col]={result:'miss'};
+          const newP2={...prev.p2,shieldedCells:prev.p2.shieldedCells.filter(s=>!(s.r===row&&s.c===col))};
+          const msg=`Searched ${COLS[col]}${row+1} — Miss (shielded).`;
+          return {...prev,hitGrid:newHit,p2:newP2,activeAction:null,actionInput:'',actionError:'',
+            pvpPendingPass:true,
+            log:[{who:`p${prev.activePlayer}`,text:msg},...prev.log],
+            pendingToast:{text:'Shielded! That tile was protected.',color:'#55aaff'}};
+        }
+      }
+      if(prev.hitGrid[row][col]!==null)
+        return {...prev,actionError:`${COLS[col]}${row+1} already searched.`};
+
+      const newHit=prev.hitGrid.map(r=>[...r]);
+      const oppCell=prev.opponentGrid[row][col];
+      const result=oppCell.type==='cr'?'cr':oppCell.type==='br'?'br':oppCell.type==='sr_res'?'sr':(oppCell.type==='starting'||oppCell.type==='territory')?'territory':'miss';
+      newHit[row][col]={result};
+
+      // Deplete the resource in opponentGrid so future logic sees it as empty
+      const newOppGrid=prev.opponentGrid.map(r=>[...r]);
+      if(result==='cr'||result==='br'||result==='sr')
+        newOppGrid[row][col]={...newOppGrid[row][col],type:'empty',collected:true};
+
+      let {sr,yourGrid,placementMode,placementRemaining}=prev;
+      let msg=`Searched ${COLS[col]}${row+1} — Miss.`;
+
+      if(result==='cr'){ placementMode=true; placementRemaining+=1; msg=`CR found at ${COLS[col]}${row+1}! Place 1 territory tile.`; }
+      if(result==='br'){ placementMode=true; placementRemaining+=7; msg=`BR found at ${COLS[col]}${row+1}! Place 7 territory tiles.`; }
+      if(result==='sr'){ sr+=1; msg=`SR found at ${COLS[col]}${row+1}! SR +1.`; }
+      if(result==='territory'){ msg=`Hit opponent territory at ${COLS[col]}${row+1}!`; }
+
+      const toastColor=result==='cr'?'#33aa33':result==='br'?'#cc3333':result==='sr'?'#7777ff':result==='territory'?'#ccaa22':'#555555';
+      return {
+        ...prev,
+        hitGrid: newHit,
+        opponentGrid: newOppGrid,
+        viewMode: placementMode?'your':'hit',
+        activeAction: null,
+        actionInput: '',
+        actionError: '',
+        actionMessage: msg,
+        sr, yourGrid, placementMode, placementRemaining,
+        log: [{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:msg},...prev.log],
+        turn: prev.aiMode?'ai':'you',
+        pvpPendingPass: prev.pvpMode&&!placementMode,
+        pendingToast:{text:msg,color:toastColor},
+      };
+    });
+  },[]);
+
+  // Attack
+  const submitAttack=useCallback(()=>{
+    setGs(prev=>{
+      const coord=parseCoord(prev.actionInput);
+      if(!coord) return {...prev,actionError:'Invalid. Use A1–L12 (e.g. D4)'};
+      const {row,col}=coord;
+      const playerBase=`${COLS[prev.ssC]}${prev.ssR+1}`;
+      const attackMsg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — logic coming soon.`;
+      return {
+        ...prev,
+        activeAction: null,
+        actionInput: '',
+        actionError: '',
+        actionMessage: attackMsg,
+        log: [{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:attackMsg},...prev.log],
+        turn: prev.aiMode?'ai':'you',
+        pvpPendingPass: prev.pvpMode,
+        pendingToast:{text:`Attack fired from ${playerBase}!`,color:'#ff5566'},
+      };
+    });
+  },[]);
+
+  // Shop
+  const buyItem=useCallback((item)=>{
+    setGs(prev=>{
+      if(prev.sr<item.cost) return prev;
+      return {
+        ...prev,
+        sr: prev.sr-item.cost,
+        inventory: [...prev.inventory,{...item,iid:Date.now()+Math.random()}],
+        shopOpen: false,
+        pendingToast:{text:`Bought ${item.name}!`,color:'#aaaa44'},
+      };
+    });
+  },[]);
+
+  const selectItem=useCallback((iid)=>{
+    setGs(prev=>{
+      const sel=prev.selectedItem===iid?null:iid;
+      const item=prev.inventory.find(i=>i.iid===iid);
+      return {...prev,selectedItem:sel,
+        pendingToast:sel?{text:`${item?.name} selected`,color:'#8888ff'}:{text:'Item deselected',color:'#555555'}};
+    });
+  },[]);
+
+  const useItem=useCallback(()=>{
+    setGs(prev=>{
+      const item=prev.inventory.find(i=>i.iid===prev.selectedItem);
+      if(!item) return prev;
+      const consume=inv=>inv.filter(i=>i.iid!==item.iid);
+      switch(item.id){
+        case 'emp':
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            ...(prev.pvpMode
+              ?{opponentStunned:true,
+                log:[{who:`p${prev.activePlayer}`,text:'Used EMP — opponent stunned next turn! Bonus move!'},...prev.log],
+                pendingToast:{text:'EMP fired! Opponent stunned. Bonus move!',color:'#ffaa00'}}
+              :{aiStunned:true,
+                log:[{who:'you',text:'Used EMP — AI stunned for 1 turn! Bonus move granted.'},...prev.log],
+                pendingToast:{text:'EMP fired! AI skips next turn. Bonus move!',color:'#ffaa00'}})};
+        case 'shield':
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            shieldMode:true,viewMode:'your',
+            pendingToast:{text:'Shield: click a territory tile on your grid to protect it',color:'#55aaff'}};
+        case 'station':
+          if(prev.stationUsed) return {...prev,pendingToast:{text:'Space Station already used this game!',color:'#ff4444'}};
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            stationMode:true,stationPicks:[],viewMode:'your',
+            pendingToast:{text:'Space Station: click up to 3 territory tiles to relocate',color:'#aa66ff'}};
+        case 'pirates': {
+          if(prev.pvpMode){
+            const newTerr=Math.max(0,prev.p2.territory-1);
+            const won=newTerr===0;
+            return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+              p2:{...prev.p2,territory:newTerr},
+              gameOver:won,winner:won?`p${prev.activePlayer}`:prev.winner,
+              log:[{who:`p${prev.activePlayer}`,text:`Used Pirates — stole 1 territory! Opponent: ${newTerr}${won?' — DEFEATED!':''}`},...prev.log],
+              pendingToast:{text:won?'Pirates! Opponent defeated — YOU WIN!':`Pirates! Opponent territory: ${newTerr}`,color:'#aa6600'}};
+          }
+          const newTerr=Math.max(0,prev.aiTerritory-1);
+          const won=newTerr===0;
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            aiTerritory:newTerr,gameOver:won,winner:won?'you':prev.winner,
+            log:[{who:'you',text:`Used Pirates — stole 1 AI territory! AI territory: ${newTerr}${won?' — AI DEFEATED!':''}`},...prev.log],
+            pendingToast:{text:won?'Pirates! AI has no territory — YOU WIN!':`Pirates! AI territory now: ${newTerr}`,color:'#aa6600'}};
+        }
+        case 'laser':
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            activeAction:'laser',viewMode:'hit',
+            pendingToast:{text:'Laser armed — pick a target coordinate',color:'#ff4488'}};
+        case 'torpedo':
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            activeAction:'torpedo',viewMode:'hit',
+            pendingToast:{text:'Torpedo armed — pick blast center coordinate',color:'#8855ff'}};
+        default:
+          return {...prev,pendingToast:{text:'Effect coming soon',color:'#555555'}};
+      }
+    });
+  },[]);
+
+  const toggleStationPick=useCallback((r,c)=>{
+    setGs(prev=>{
+      if(!prev.stationMode) return prev;
+      const idx=prev.stationPicks.findIndex(p=>p.r===r&&p.c===c);
+      if(idx>=0) return {...prev,stationPicks:prev.stationPicks.filter((_,i)=>i!==idx)};
+      if(prev.stationPicks.length>=3) return {...prev,pendingToast:{text:'Max 3 tiles',color:'#ff4444'}};
+      return {...prev,stationPicks:[...prev.stationPicks,{r,c}]};
+    });
+  },[]);
+
+  const confirmStationPicks=useCallback(()=>{
+    setGs(prev=>{
+      if(!prev.stationMode||prev.stationPicks.length===0) return prev;
+      const g=cloneGrid(prev.yourGrid);
+      prev.stationPicks.forEach(({r,c})=>{g[r][c]=mkCell('empty');});
+      const n=prev.stationPicks.length;
+      return {...prev,yourGrid:g,territory:prev.territory-n,
+        stationMode:false,stationPicks:[],stationUsed:true,
+        placementMode:true,placementRemaining:n,viewMode:'your',
+        pendingToast:{text:`Moving ${n} tile${n>1?'s':''}… place them now`,color:'#aa66ff'}};
+    });
+  },[]);
+
+  const cancelStation=useCallback(()=>{
+    setGs(prev=>({...prev,stationMode:false,stationPicks:[],
+      pendingToast:{text:'Space Station cancelled',color:'#555555'}}));
+  },[]);
+
+  const applyShield=useCallback((r,c)=>{
+    setGs(prev=>{
+      if(!prev.shieldMode) return prev;
+      const cell=prev.yourGrid[r][c];
+      if(cell.type!=='territory'&&cell.type!=='starting')
+        return {...prev,pendingToast:{text:'Can only shield territory tiles',color:'#ff4444'}};
+      if(prev.shieldedCells.some(s=>s.r===r&&s.c===c))
+        return {...prev,pendingToast:{text:'Already shielded',color:'#ff4444'}};
+      return {...prev,shieldedCells:[...prev.shieldedCells,{r,c}],shieldMode:false,
+        pendingToast:{text:`${COLS[c]}${r+1} is now shielded!`,color:'#55aaff'}};
+    });
+  },[]);
+
+  const cancelShield=useCallback(()=>{
+    setGs(prev=>({...prev,shieldMode:false,
+      pendingToast:{text:'Shield cancelled',color:'#555555'}}));
+  },[]);
+
+  const submitLaser=useCallback(()=>{
+    setGs(prev=>{
+      const coord=parseCoord(prev.actionInput);
+      if(!coord) return {...prev,actionError:'Invalid. Use A1–L12'};
+      const {row,col}=coord;
+      const alreadyHit=prev.hitGrid[row][col];
+      const oppCell=prev.opponentGrid[row][col];
+      if(alreadyHit&&alreadyHit.result!=='territory') return {...prev,actionError:`${COLS[col]}${row+1} already resolved.`};
+      if(alreadyHit&&alreadyHit.result==='territory'&&oppCell.type==='empty') return {...prev,actionError:`${COLS[col]}${row+1} already destroyed.`};
+      const result=alreadyHit?'territory':
+        oppCell.type==='cr'&&!oppCell.collected?'cr':
+        oppCell.type==='br'&&!oppCell.collected?'br':
+        oppCell.type==='sr_res'&&!oppCell.collected?'sr':
+        (oppCell.type==='starting'||oppCell.type==='territory')?'territory':'miss';
+      const newHit=prev.hitGrid.map(r=>[...r]);
+      newHit[row][col]={result};
+      const newOppGrid=cloneGrid(prev.opponentGrid);
+      if(!alreadyHit&&(result==='cr'||result==='br'||result==='sr'))
+        newOppGrid[row][col]={...newOppGrid[row][col],type:'empty',collected:true};
+      const isHome=oppCell.type==='starting';
+      if(result==='territory'&&!isHome) newOppGrid[row][col]=mkCell('empty');
+      let {sr,placementMode,placementRemaining}=prev;
+      let msg;
+      if(result==='cr'){placementMode=true;placementRemaining+=1;msg=`Laser: CR at ${COLS[col]}${row+1}! Place 1 tile.`;}
+      else if(result==='br'){placementMode=true;placementRemaining+=7;msg=`Laser: BR at ${COLS[col]}${row+1}! Place 7 tiles.`;}
+      else if(result==='sr'){sr+=1;msg=`Laser: SR at ${COLS[col]}${row+1}! SR +1.`;}
+      else if(result==='territory') msg=`Laser: ${isHome?'hit opponent base — indestructible':'destroyed territory'} at ${COLS[col]}${row+1}!`;
+      else msg=`Laser: miss at ${COLS[col]}${row+1}.`;
+      const playerBase=`${COLS[prev.ssC]}${prev.ssR+1}`;
+      const logMsg=`${msg} (fired from ${playerBase})`;
+      const tc=result==='cr'?'#33aa33':result==='br'?'#cc3333':result==='sr'?'#7777ff':result==='territory'?'#ff4488':'#555555';
+      return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,
+        activeAction:null,actionInput:'',actionError:'',actionMessage:logMsg,
+        sr,placementMode,placementRemaining,
+        log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:logMsg},...prev.log],
+        turn:prev.aiMode?'ai':'you',
+        pvpPendingPass:prev.pvpMode&&!placementMode,
+        pendingToast:{text:msg,color:tc}};
+    });
+  },[]);
+
+  const submitTorpedo=useCallback(()=>{
+    setGs(prev=>{
+      const coord=parseCoord(prev.actionInput);
+      if(!coord) return {...prev,actionError:'Invalid. Use A1–L12'};
+      const {row:cr,col:cc}=coord;
+      let newHit=prev.hitGrid.map(r=>[...r]);
+      let newOppGrid=cloneGrid(prev.opponentGrid);
+      let {sr,placementMode,placementRemaining}=prev;
+      const hits=[];
+      let won=false;
+      // Check center for instant win
+      if(newHit[cr][cc]===null){
+        const centerCell=newOppGrid[cr][cc];
+        if(centerCell.type==='territory'||centerCell.type==='starting'){
+          newHit[cr][cc]={result:'territory'};
+          won=true;
+        }
+      }
+      if(!won){
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const tr=cr+dr,tc=cc+dc;
+          const isCenter=dr===0&&dc===0;
+          if(!inBounds(tr,tc)||newHit[tr][tc]!==null) continue;
+          const oppCell=newOppGrid[tr][tc];
+          const result=
+            oppCell.type==='cr'&&!oppCell.collected?'cr':
+            oppCell.type==='br'&&!oppCell.collected?'br':
+            oppCell.type==='sr_res'&&!oppCell.collected?'sr':
+            (oppCell.type==='starting'||oppCell.type==='territory')?'territory':'miss';
+          newHit[tr][tc]={result};
+          if(result==='cr'||result==='br'||result==='sr')
+            newOppGrid[tr][tc]={...newOppGrid[tr][tc],type:'empty',collected:true};
+          if(!isCenter&&result==='territory'&&oppCell.type!=='starting')
+            newOppGrid[tr][tc]=mkCell('empty');
+          if(result==='cr'){placementMode=true;placementRemaining+=1;}
+          if(result==='br'){placementMode=true;placementRemaining+=7;}
+          if(result==='sr') sr+=1;
+          if(result!=='miss') hits.push(`${COLS[tc]}${tr+1}`);
+        }
+      }
+      const playerBase=`${COLS[prev.ssC]}${prev.ssR+1}`;
+      const msg=won
+        ?`Torpedo from ${playerBase} — center hit enemy territory at ${COLS[cc]}${cr+1}! YOU WIN!`
+        :`Torpedo from ${playerBase} at ${COLS[cc]}${cr+1}! Hits: ${hits.length?hits.join(', '):'none'}.`;
+      const torpWinner=prev.pvpMode?`p${prev.activePlayer}`:'you';
+      return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,
+        activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+        sr,placementMode,placementRemaining,
+        gameOver:won,winner:won?torpWinner:prev.winner,
+        log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:msg},...prev.log],
+        turn:prev.aiMode&&!won?'ai':'you',
+        pvpPendingPass:prev.pvpMode&&!won,
+        pendingToast:{text:won?`TORPEDO WIN! ${prev.pvpMode?`Player ${prev.activePlayer} wins!`:'YOU WIN!'}`:msg,color:won?'#44ff44':'#8855ff'}};
+    });
+  },[]);
+
+  const set_=(k,v)=>setGs(p=>({...p,...(typeof k==='string'?{[k]:v}:k)}));
+  const openAction=t=>{
+    const next=gs.activeAction===t?null:t;
+    set_({activeAction:next,actionInput:'',actionError:'',actionMessage:'',
+      pendingToast:next?{text:`${next==='search'?'Search':'Attack'} mode`,color:'#667788'}:{text:'Action cancelled',color:'#444444'}});
+  };
+  const closeAction=()=>set_({activeAction:null,actionInput:'',actionError:'',pendingToast:{text:'Action cancelled',color:'#444444'}});
+  const onInput=v=>set_({actionInput:v.toUpperCase(),actionError:''});
+  const onKey=e=>{
+    if(e.key==='Enter'){
+      if(gs.activeAction==='search') submitSearch();
+      else if(gs.activeAction==='attack') submitAttack();
+      else if(gs.activeAction==='laser') submitLaser();
+      else if(gs.activeAction==='torpedo') submitTorpedo();
+    }
+    if(e.key==='Escape') closeAction();
+  };
+
+  const vp=gs.placementMode?validPlacements(gs.yourGrid):new Set();
+
+  // ── Cell Renderers ──────────────────────────────────────────────────────────
+
+  function renderYour(cell,r,c){
+    const key=`${r},${c}`;
+    const isValid=gs.placementMode&&vp.has(key);
+    const isHovered=gs.placementMode&&hoverCell&&hoverCell.r===r&&hoverCell.c===c;
+    const mEnter=gs.placementMode?{onMouseEnter:()=>setHoverCell({r,c})}:{};
+
+    if(gs.stationMode){
+      const isPicked=gs.stationPicks.some(p=>p.r===r&&p.c===c);
+      const isPickable=cell.type==='territory';
+      if(isPicked) return(
+        <div key={c} className="cell c-station-sel" onClick={()=>toggleStationPick(r,c)} title={`${COLS[c]}${r+1} — deselect`}>
+          <span style={{color:'#dd88ff',fontSize:15,lineHeight:1}}>◆</span>
+        </div>
+      );
+      if(isPickable) return(
+        <div key={c} className="cell c-station-pick" onClick={()=>toggleStationPick(r,c)} title={`${COLS[c]}${r+1} — pick to move`}/>
+      );
+    }
+
+    if(gs.shieldMode&&(cell.type==='territory'||cell.type==='starting')){
+      const alreadyShielded=gs.shieldedCells.some(s=>s.r===r&&s.c===c);
+      return(
+        <div key={c} className="cell" style={{background:'#081828',borderColor:'#2266cc',cursor:alreadyShielded?'not-allowed':'pointer'}}
+          onClick={alreadyShielded?undefined:()=>applyShield(r,c)}
+          title={alreadyShielded?`${COLS[c]}${r+1} — already shielded`:`${COLS[c]}${r+1} — click to shield`}>
+          <span style={{fontSize:13,lineHeight:1}}>{alreadyShielded?'🛡':'🔲'}</span>
+        </div>
+      );
+    }
+
+    if(isHovered){
+      return(
+        <div key={c} className={`cell ${isValid?'c-ghost-valid':'c-ghost-invalid'}`}
+          onClick={isValid?()=>placeTile(r,c):undefined}
+          title={`${COLS[c]}${r+1}`} {...mEnter}>
+          <span style={{color:isValid?'#ffee00':'#332200',fontSize:20,lineHeight:1}}>◆</span>
+        </div>
+      );
+    }
+
+    if(isValid) return(
+      <div key={c} className="cell c-valid" onClick={()=>placeTile(r,c)} title={`${COLS[c]}${r+1}`} {...mEnter}/>
+    );
+
+    let cls='cell ';
+    let inner=null;
+    switch(cell.type){
+      case 'starting': {
+        const sShielded=gs.shieldedCells.some(s=>s.r===r&&s.c===c);
+        cls+='c-starting';
+        inner=<><span className="cell-icon" style={{color:'#ffe066',fontSize:15}}>★</span>{sShielded&&<span style={{fontSize:7,position:'absolute',bottom:1,right:2,color:'#55aaff'}}>🛡</span>}</>;
+        break;
+      }
+      case 'territory': {
+        const tShielded=gs.shieldedCells.some(s=>s.r===r&&s.c===c);
+        cls+='c-territory';
+        inner=tShielded?<span style={{fontSize:10,color:'#55aaff',lineHeight:1}}>🛡</span>:null;
+        break;
+      }
+      case 'cr':
+        cls+='c-cr'+(cell.collected?' done':'');
+        inner=cell.collected
+          ?<span style={{color:'#1a3a1a',fontSize:13}}>✕</span>
+          :<span className="cell-icon" style={{color:'#33aa33'}}>◆</span>;
+        break;
+      case 'br':
+        cls+='c-br'+(cell.collected?' done':'');
+        inner=cell.collected
+          ?<span style={{color:'#3a1a1a',fontSize:13}}>✕</span>
+          :<span className="cell-icon" style={{color:'#cc3333'}}>◆</span>;
+        break;
+      case 'sr_res':
+        cls+='c-srr'+(cell.collected?' done':'');
+        inner=cell.collected
+          ?<span style={{color:'#1a1a3a',fontSize:13}}>✕</span>
+          :<span className="cell-icon" style={{color:'#3333cc'}}>◆</span>;
+        break;
+      default:
+        cls+='c-empty';
+    }
+    return <div key={c} className={cls} title={`${COLS[c]}${r+1}`} {...mEnter}>{inner}</div>;
+  }
+
+  function renderHit(cell,r,c){
+    if(!cell) return <div key={c} className="cell c-hit-blank" title={`${COLS[c]}${r+1}`}/>;
+    if(cell.result==='miss') return <div key={c} className="cell c-hit-miss" title={`${COLS[c]}${r+1}`}/>;
+    const map={
+      cr:       {cls:'c-hit-cr',  xc:'#44cc44', lbl:'CR'},
+      br:       {cls:'c-hit-br',  xc:'#cc4444', lbl:'BR'},
+      sr:       {cls:'c-hit-sr',  xc:'#4444cc', lbl:'SR'},
+      territory:{cls:'c-hit-ter', xc:'#ccaa22', lbl:'Terr.'},
+    };
+    const {cls,xc,lbl}=map[cell.result]||{cls:'c-hit-miss',xc:'#444',lbl:''};
+    return(
+      <div key={c} className={`cell ${cls}`} title={`${COLS[c]}${r+1}`}>
+        <span style={{color:xc,fontSize:18,lineHeight:1}}>◆</span>
+        <span style={{fontSize:7,color:'rgba(255,255,255,.5)',lineHeight:1,marginTop:1}}>{lbl}</span>
+      </div>
+    );
+  }
+
+  // ── Render ──────────────────────────────────────────────────────────────────
+
+  const selInvItem=gs.inventory.find(i=>i.iid===gs.selectedItem);
+
+  if(phase==='loading') return(
+    <div className="loading-screen">
+      <div className="start-title" style={{fontSize:32,letterSpacing:6}}>It's Just Logic</div>
+      <div style={{fontSize:12,color:'#333',letterSpacing:4,textTransform:'uppercase'}}>Loading…</div>
+    </div>
+  );
+
+  if(phase==='difficulty') return(
+    <div className="start-screen">
+      <div>
+        <div className="start-title">It's Just Logic</div>
+        <div className="start-sub">Choose difficulty</div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:'12px',alignItems:'center'}}>
+        <button className="btn-start" onClick={()=>chooseAi('easy')}>Easy</button>
+        <button className="btn-start" onClick={()=>chooseAi('medium')}>Medium</button>
+        <button className="btn-start" onClick={()=>chooseAi('hard')}>Hard</button>
+        <button style={{marginTop:4,fontSize:11,color:'#444',background:'none',border:'none',cursor:'pointer',letterSpacing:2,textTransform:'uppercase',fontFamily:'inherit'}} onClick={()=>setPhase('start')}>← Back</button>
+      </div>
+    </div>
+  );
+
+  if(phase==='start') return(
+    <div className="start-screen">
+      <div>
+        <div className="start-title">It's Just Logic</div>
+        <div className="start-sub">A game of deduction</div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:'12px',alignItems:'center'}}>
+        <button className="btn-start" onClick={()=>startGame(false)}>Start 1v0</button>
+        <button className="btn-start" onClick={startPvp}>1v1</button>
+        <button className="btn-start" onClick={()=>setPhase('difficulty')}>Vs AI</button>
+      </div>
+    </div>
+  );
+
+  if(pvpLoading) return(
+    <div className="loading-screen">
+      <div className="start-title" style={{fontSize:28,letterSpacing:6}}>Pass the Device</div>
+      <div style={{fontSize:72,fontWeight:'bold',color:'#8888ff',lineHeight:1}}>{pvpCountdown}</div>
+      <div style={{fontSize:11,color:'#333',letterSpacing:4,textTransform:'uppercase'}}>Player {gs.activePlayer===1?2:1} — get ready</div>
+    </div>
+  );
+
+  return(
+    <div className="app">
+      <div className="main">
+
+        {/* LEFT — GRID */}
+        <div className="grid-area">
+          <div className="grid-controls">
+            <span className="view-title">{gs.viewMode==='your'?'YOUR GRID':'HIT GRID'}</span>
+            <button className={`btn btn-view${gs.viewMode==='your'?' on':''}`}
+              onClick={()=>set_({viewMode:'your',pendingToast:{text:'Viewing your grid',color:'#557799'}})}>Your Grid</button>
+            <button className={`btn btn-view${gs.viewMode==='hit'?' on':''}`}
+              onClick={()=>set_({viewMode:'hit',pendingToast:{text:'Viewing hit grid',color:'#557799'}})}>Hit Grid</button>
+          </div>
+
+          {(()=>{
+            const crFound=gs.hitGrid.flat().filter(c=>c?.result==='cr').length;
+            const brFound=gs.hitGrid.flat().filter(c=>c?.result==='br').length;
+            const srFound=gs.hitGrid.flat().filter(c=>c?.result==='sr').length;
+            return(
+              <div className="res-counter">
+                <div className={`res-pill res-cr`}><span className="res-pill-lbl">CR</span>{20-crFound}</div>
+                <div className={`res-pill res-br`}><span className="res-pill-lbl">BR</span>{4-brFound}</div>
+                <div className={`res-pill res-sr`}><span className="res-pill-lbl">SR</span>{10-srFound}</div>
+              </div>
+            );
+          })()}
+
+          <div className="grid-scroll" onMouseLeave={()=>gs.placementMode&&setHoverCell(null)}>
+            <div className="grid-wrap">
+              <div className="col-labels">
+                {COLS.map(l=><div key={l} className="col-lbl">{l}</div>)}
+              </div>
+              {Array.from({length:12},(_,r)=>(
+                <div key={r} className="grid-row">
+                  <div className="row-lbl">{r+1}</div>
+                  {Array.from({length:12},(_,c)=>
+                    gs.viewMode==='your'
+                      ?renderYour(gs.yourGrid[r][c],r,c)
+                      :renderHit(gs.hitGrid[r][c],r,c)
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* MID PANEL */}
+        <div className="mid">
+          <div className="mid-head">History</div>
+          <div className="log-list">
+            {gs.log.length===0
+              ?<div className="log-empty">No moves yet</div>
+              :gs.log.map((entry,i)=>(
+                <div key={i} className={`log-entry ${entry.who==='you'||entry.who==='p1'?'log-you':entry.who==='p2'?'log-p2':'log-opp'}`}>
+                  <span className="log-who">{entry.who==='you'?'YOU':entry.who==='p1'?'P1':entry.who==='p2'?'P2':'AI'}</span>
+                  {entry.who==='ai'?'made a move.':entry.text}
+                </div>
+              ))
+            }
+          </div>
+          <div className="notes-wrap">
+            <div className="mid-head">Notes</div>
+            <textarea className="notes-inp"
+              value={notes}
+              onChange={e=>setNotes(e.target.value)}
+              placeholder="Write notes here…"/>
+          </div>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div className="right">
+          <div className="stat-card">
+            <div className="stat-name">Territory</div>
+            <div className={`stat-val sv-ter`}>{gs.territory}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-name">SR</div>
+            <div className={`stat-val sv-sr`}>{gs.sr}</div>
+          </div>
+
+          <button className="btn btn-shop" onClick={()=>set_({shopOpen:true,pendingToast:{text:'Shop opened',color:'#aaaa44'}})}>⬡ SHOP</button>
+
+          <div>
+            <div className="sec-head">Inventory</div>
+            {gs.inventory.length===0
+              ?<div className="inv-empty">No items owned</div>
+              :gs.inventory.map(item=>(
+                <div key={item.iid} className={`inv-item${gs.selectedItem===item.iid?' sel':''}`}>
+                  <span className="inv-name">{item.name}</span>
+                  <button className={`btn btn-sel${gs.selectedItem===item.iid?' on':''}`}
+                    onClick={()=>selectItem(item.iid)}>
+                    {gs.selectedItem===item.iid?'Active':'Select'}
+                  </button>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM BAR */}
+      <div className="bottom">
+        {gs.placementMode&&(
+          <div className="place-banner">
+            Place territory: {gs.placementRemaining} remaining — click a highlighted square
+          </div>
+        )}
+        {selInvItem&&!gs.stationMode&&(
+          <div className="sel-banner" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
+            <span style={{fontSize:11}}>
+              {selInvItem.name} — {
+                selInvItem.id==='emp'?'stuns AI for 1 turn; you get a bonus move.':
+                selInvItem.id==='shield'?'click a territory tile on your grid to protect it.':
+                selInvItem.id==='station'?'relocate 1–3 of your territory tiles.':
+                selInvItem.id==='pirates'?'steal 1 territory tile from opponent.':
+                selInvItem.id==='laser'?'destroy any tile on either grid.':
+                selInvItem.id==='torpedo'?'3×3 blast centered on a coordinate.':
+                'choose a target.'
+              }
+            </span>
+            <button className="btn btn-go" style={{padding:'4px 14px',fontSize:12}} onClick={useItem}>Use</button>
+          </div>
+        )}
+        {gs.stationMode&&(
+          <div className="place-banner" style={{borderColor:'#7722cc',color:'#cc88ff',display:'flex',alignItems:'center',gap:10}}>
+            <span>Space Station: pick up to 3 territory tiles — {gs.stationPicks.length} selected</span>
+            {gs.stationPicks.length>0&&<button className="btn" style={{padding:'4px 12px',fontSize:11,color:'#cc88ff',borderColor:'#7722cc'}} onClick={confirmStationPicks}>Move</button>}
+            <button className="btn btn-cancel" style={{padding:'4px 10px',fontSize:11}} onClick={cancelStation}>Cancel</button>
+          </div>
+        )}
+        {gs.shieldMode&&(
+          <div className="place-banner" style={{borderColor:'#2266cc',color:'#55aaff',display:'flex',alignItems:'center',gap:10}}>
+            <span>Shield: click a territory tile on your grid to protect it</span>
+            <button className="btn btn-cancel" style={{padding:'4px 10px',fontSize:11}} onClick={cancelShield}>Cancel</button>
+          </div>
+        )}
+        {gs.actionMessage&&!gs.activeAction&&(
+          <div className="msg-txt">{gs.actionMessage}</div>
+        )}
+        <div className="bottom-row">
+          {gs.pvpMode&&<span style={{fontSize:'10px',color:'#8888aa',letterSpacing:'1px',textTransform:'uppercase'}}>Player {gs.activePlayer}'s Turn</span>}
+          {gs.aiMode&&<span style={{fontSize:'10px',color:'#444',letterSpacing:'1px',textTransform:'uppercase'}}>AI: {gs.aiDifficulty}</span>}
+          {gs.aiMode&&gs.turn==='ai'&&(
+            <span className="msg-txt" style={{color:'#dd8866'}}>AI is thinking…</span>
+          )}
+          {phase==='game'&&gs.turn==='you'&&!gs.gameOver&&!gs.pvpMode&&(
+            <span style={{fontSize:13,fontWeight:'bold',fontVariantNumeric:'tabular-nums',
+              color:timeLeft<=10?'#cc4444':timeLeft<=30?'#ffaa00':'#556677',
+              border:'1px solid',borderColor:timeLeft<=10?'#441111':timeLeft<=30?'#443300':'#1a2233',
+              borderRadius:4,padding:'2px 8px',background:'#080810'}}>
+              {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}
+            </span>
+          )}
+          {gs.pvpMode&&gs.pvpPendingPass&&!gs.gameOver&&(
+            <button className="btn-start" style={{fontSize:13,padding:'8px 28px'}} onClick={passPvp}>Pass Device →</button>
+          )}
+          {!gs.pvpPendingPass&&gs.viewMode==='hit'&&gs.turn==='you'&&<>
+          <button className={`btn btn-search${gs.activeAction==='search'?' btn-view on':''}`}
+            onClick={()=>openAction('search')}>Search</button>
+          <button className={`btn btn-attack${gs.activeAction==='attack'?' btn-view on':''}`}
+            onClick={()=>openAction('attack')}>Attack</button>
+          </>}
+
+          {!gs.pvpPendingPass&&gs.activeAction&&gs.turn==='you'&&(<>
+            <div className="action-form">
+              <span className="action-lbl">
+                {gs.activeAction==='search'?'Search':gs.activeAction==='attack'?'Attack':gs.activeAction==='laser'?'Laser':'Torpedo'}
+              </span>
+              <input ref={inputRef} className="coord-inp"
+                value={gs.actionInput}
+                onChange={e=>onInput(e.target.value)}
+                onKeyDown={onKey}
+                placeholder="D4" maxLength={3}/>
+            </div>
+            <button className="btn btn-go"
+              onClick={gs.activeAction==='search'?submitSearch:gs.activeAction==='attack'?submitAttack:gs.activeAction==='laser'?submitLaser:submitTorpedo}>Go</button>
+            <button className="btn btn-cancel" onClick={closeAction}>✕</button>
+            {gs.actionError&&<span className="err-txt">{gs.actionError}</span>}
+          </>)}
+        </div>
+      </div>
+
+      {/* TOASTS */}
+      <div className="toast-wrap">
+        {toasts.map(t=>(
+          <div key={t.id} className="toast" style={{borderColor:t.color,borderLeftColor:t.color,borderLeftWidth:3,color:'#eee'}}>{t.text}</div>
+        ))}
+      </div>
+
+      {/* GAME OVER */}
+      {gs.gameOver&&(
+        <div className="modal-bg">
+          <div className="modal" style={{textAlign:'center',padding:'36px 28px'}}>
+            <div style={{fontSize:36,fontWeight:'bold',letterSpacing:3,color:gs.winner==='you'?'#44cc44':'#cc4444',marginBottom:10}}>
+              {gs.winner==='you'?'VICTORY':'DEFEAT'}
+            </div>
+            <div style={{fontSize:13,color:'#555',marginBottom:28}}>
+              {gs.winner==='you'?'You have annihilated your opponent.':'Your territory has been destroyed.'}
+            </div>
+            <button className="btn-start" style={{fontSize:14,padding:'10px 32px'}} onClick={()=>setPhase('start')}>Play Again</button>
+          </div>
+        </div>
+      )}
+
+      {/* SHOP MODAL */}
+      {gs.shopOpen&&(
+        <div className="modal-bg" onClick={e=>e.target===e.currentTarget&&set_({shopOpen:false,pendingToast:{text:'Shop closed',color:'#555555'}})}>
+          <div className="modal">
+            <div className="modal-hdr">
+              <div>
+                <div className="modal-title">⬡ SHOP</div>
+                <div className="modal-sub">Current SR: {gs.sr}</div>
+              </div>
+              <button className="modal-close" onClick={()=>set_({shopOpen:false,pendingToast:{text:'Shop closed',color:'#555555'}})}>✕</button>
+            </div>
+            {SHOP_ITEMS.map(item=>(
+              <div key={item.id} className="shop-item">
+                <div className="shop-body">
+                  <div className="shop-name">{item.name}</div>
+                  <div className="shop-cost">{item.cost} SR</div>
+                  <div className="shop-desc">{item.desc}</div>
+                </div>
+                <button className="btn btn-buy"
+                  disabled={gs.sr<item.cost}
+                  onClick={()=>buyItem(item)}>BUY</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
