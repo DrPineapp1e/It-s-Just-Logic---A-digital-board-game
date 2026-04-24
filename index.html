@@ -49,6 +49,7 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .c-hit-br{background:#2c0c0c;border-color:#702828}
 .c-hit-sr{background:#0c0c2c;border-color:#282870}
 .c-hit-ter{background:#2c280c;border-color:#706018}
+.c-fog{background:#050508;border-color:#08080e}
 .c-valid{background:#081808!important;border-color:#22cc22!important;cursor:pointer!important}
 .c-valid:hover{background:#122812!important;box-shadow:inset 0 0 10px rgba(34,204,34,.25)}
 .c-ghost-valid{background:#1a1500!important;border-color:#ffee00!important;cursor:pointer!important}
@@ -174,6 +175,7 @@ const SHOP_ITEMS = [
   { id:'station', name:'Space Station',      cost:3, desc:"Place 1 station tile (cyan) anywhere on your grid. Collecting adjacent CRs works same as expanding. Max 7 station tiles total. When attacked, station size defends vs attacker territory — losing station tiles doesn't end the game." },
   { id:'addroot', name:'Add Root',            cost:4, desc:"Add an extra root to any territory or station tile — that tile becomes an additional starting point. Both the old root and the new one anchor your territory. Tiles connected to either root are safe. (If you root onto a station tile it leaves the station pool.)" },
   { id:'torpedo', name:'Antimatter Torpedo', cost:7, desc:"3x3 blast. Center hits territory = instant win. Outer ring destroys what it hits." },
+  { id:'probe',   name:'Resource Probe',    cost:4, desc:"Reveals 3 resource coordinates on the opponent's grid: one BR (or SR if no BR), one SR, and one CR (or SR if no BR). Using any item costs 1 move." },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -204,7 +206,7 @@ function generateGrid(){
   const ssC = 2 + Math.floor(Math.random()*8);
   grid[ssR][ssC] = mkCell('starting');
 
-  const inExcl = (r,c) => Math.abs(r-ssR)<=2 && Math.abs(c-ssC)<=2;
+  const inExcl = (r,c) => Math.abs(r-ssR)<=1 && Math.abs(c-ssC)<=1;
   const adjTypes = (r,c,types) => allAdj(r,c).some(([nr,nc])=>types.includes(grid[nr][nc].type));
 
   // 20 CRs — no two adjacent to each other
@@ -233,9 +235,9 @@ function generateGrid(){
     placed++;
   }
 
-  // 10 SRs
+  // 12 SRs
   placed=0; tries=0;
-  while(placed<10 && tries<200000){
+  while(placed<12 && tries<200000){
     tries++;
     const r=Math.floor(Math.random()*12), c=Math.floor(Math.random()*12);
     if(grid[r][c].type!=='empty') continue;
@@ -377,12 +379,12 @@ function applyAiSearch(state,row,col,destroy=false){
   }
   let {aiTerritory,aiSr,aiOwnGrid}=state;
   if(result==='cr'){aiTerritory++;aiOwnGrid=autoPlaceAiTerritory(aiOwnGrid,1);}
-  else if(result==='br'){aiTerritory+=7;aiOwnGrid=autoPlaceAiTerritory(aiOwnGrid,7);}
+  else if(result==='br'){aiTerritory+=5;aiOwnGrid=autoPlaceAiTerritory(aiOwnGrid,5);}
   else if(result==='sr'){aiSr++;}
   const aiDominated=aiTerritory>=21;
   const msg=result==='miss'?`Searched ${COLS[col]}${row+1} — Miss.`:
     result==='cr'?`CR found at ${COLS[col]}${row+1}! Placed 1 territory.`:
-    result==='br'?`BR found at ${COLS[col]}${row+1}! Placed 7 territory.`:
+    result==='br'?`BR found at ${COLS[col]}${row+1}! Placed 5 territory.`:
     result==='sr'?`SR found at ${COLS[col]}${row+1}! SR +1.`:
     `Hit your territory at ${COLS[col]}${row+1}!`;
   const newState={...state,aiHitGrid:newHG,yourGrid:newYG,aiTerritory,aiSr,aiOwnGrid,territory};
@@ -814,7 +816,7 @@ function App(){
       let msg=`Searched ${COLS[col]}${row+1} — Miss.`;
 
       if(result==='cr'){ placementMode=true; placementRemaining+=1; msg=`CR found at ${COLS[col]}${row+1}! Place 1 territory tile.`; }
-      if(result==='br'){ placementMode=true; placementRemaining+=7; msg=`BR found at ${COLS[col]}${row+1}! Place 7 territory tiles.`; }
+      if(result==='br'){ placementMode=true; placementRemaining+=5; msg=`BR found at ${COLS[col]}${row+1}! Place 5 territory tiles.`; }
       if(result==='sr'){ sr+=1; msg=`SR found at ${COLS[col]}${row+1}! SR +1.`; }
       if(result==='territory'){ msg=`Hit opponent territory at ${COLS[col]}${row+1}!`; }
 
@@ -838,7 +840,7 @@ function App(){
     });
   },[]);
 
-  // Attack — destroy an opponent territory tile if you have more territory than them
+  // Attack — win condition: your territory vs opponent territory. No tile destruction.
   const submitAttack=useCallback(()=>{
     setGs(prev=>{
       if(prev.playerStunned){
@@ -909,81 +911,48 @@ function App(){
           pendingToast:{text:'Attack: no territory there.',color:'#555555'}};
       }
 
-      // ── Territory attack ──────────────────────────────────────────────────────
+      // ── Territory attack — pure win condition, no tile destruction ───────────
+      // Shields and indestructibility are irrelevant — this is a territory battle.
       const oppTerritory=prev.pvpMode?prev.p2.territory:prev.aiTerritory;
       const isStronger=prev.territory>oppTerritory;
-      if(!isStronger){
-        newHit[row][col]={result:'miss'};
-        const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — repelled! Need more territory to attack (you: ${prev.territory}, opponent: ${oppTerritory}).`;
+      newHit[row][col]={result:isStronger?'territory':'miss'};
+
+      if(isStronger){
+        // YOU WIN — your territory overwhelms theirs
+        const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — your territory (${prev.territory}) overwhelms opponent (${oppTerritory})! VICTORY!`;
+        if(prev.pvpMode){
+          return {...prev,hitGrid:newHit,
+            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+            gameOver:true,winner:who,
+            log:[{who,text:msg},...prev.log],
+            pvpPendingPass:false,
+            pendingToast:{text:`Player ${prev.activePlayer} wins — territory superiority!`,color:'#44ff44'}};
+        }
         return {...prev,hitGrid:newHit,
           activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
-          log:[{who,text:msg},...prev.log],
-          turn:prev.aiMode?'ai':'you',
-          pvpPendingPass:prev.pvpMode,
-          pendingToast:{text:`Attack repelled — opponent has ${oppTerritory} tiles, you have ${prev.territory}. You need more!`,color:'#cc6644'}};
-      }
-
-      // Attack succeeds — destroy tile (starting tiles are indestructible)
-      newHit[row][col]={result:'territory'};
-      const canDestroy=oppCell.type!=='starting';
-      const newOppGrid=cloneGrid(prev.opponentGrid);
-      if(canDestroy) newOppGrid[row][col]=mkCell('empty');
-
-      if(prev.pvpMode){
-        const newP2YG=cloneGrid(prev.p2.yourGrid);
-        if(canDestroy) newP2YG[row][col]=mkCell('empty');
-        let finalP2YG=newP2YG;
-        let pruneMsg='';
-        let prunedCount=0;
-        if(canDestroy){
-          const {grid:pruned,removed}=pruneDisconnected(newP2YG,prev.p2.ssR,prev.p2.ssC);
-          finalP2YG=pruned;
-          prunedCount=removed;
-          if(removed>0){
-            pruneMsg=` +${removed} disconnected tile${removed!==1?'s':''} terminated!`;
-            // Sync attacker's opponentGrid view with pruned state
-            for(let pr=0;pr<12;pr++) for(let pc=0;pc<12;pc++){
-              if(pruned[pr][pc].type==='empty'&&newOppGrid[pr][pc].type==='territory')
-                newOppGrid[pr][pc]=mkCell('empty');
-            }
-          }
+          gameOver:true,winner:'you',
+          log:[{who:'you',text:msg},...prev.log],
+          turn:'you',
+          pendingToast:{text:'ATTACK! Territory superior — YOU WIN!',color:'#44ff44'}};
+      } else {
+        // THEY WIN — opponent territory holds, you are defeated
+        const loserWinner=prev.pvpMode?(prev.activePlayer===1?'p2':'p1'):'ai';
+        const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — opponent's territory (${oppTerritory}) repels yours (${prev.territory})! DEFEATED!`;
+        if(prev.pvpMode){
+          return {...prev,hitGrid:newHit,
+            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+            gameOver:true,winner:loserWinner,
+            log:[{who,text:msg},...prev.log],
+            pvpPendingPass:false,
+            pendingToast:{text:`Player ${prev.activePlayer} loses — attack repelled!`,color:'#cc4444'}};
         }
-        const newP2Terr=Math.max(0,prev.p2.territory-(canDestroy?1+prunedCount:0));
-        const newP2={...prev.p2,yourGrid:finalP2YG,territory:newP2Terr};
-        const won=newP2Terr===0;
-        const msg=won
-          ?`Attack from ${playerBase} → ${COLS[col]}${row+1} — enemy territory destroyed! OPPONENT DEFEATED!`
-          :`Attack from ${playerBase} → ${COLS[col]}${row+1} — destroyed territory! Opponent territory: ${newP2Terr}${pruneMsg}`;
-        return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,p2:newP2,
+        return {...prev,hitGrid:newHit,
           activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
-          gameOver:won,winner:won?who:prev.winner,
-          log:[{who,text:msg},...prev.log],
-          pvpPendingPass:!won,
-          pendingToast:{text:won?`Player ${prev.activePlayer} wins — enemy defeated!`:`Attack hit! Opponent territory: ${newP2Terr}${pruneMsg}`,color:won?'#44ff44':'#ff5566'}};
+          gameOver:true,winner:'ai',
+          log:[{who:'you',text:msg},...prev.log],
+          turn:'you',
+          pendingToast:{text:'Attack repelled — DEFEAT!',color:'#cc4444'}};
       }
-
-      // AI / 1v0 mode
-      let finalOppGrid=newOppGrid;
-      let prunedCount=0;
-      let pruneMsg='';
-      if(canDestroy){
-        const {grid:pruned,removed}=pruneDisconnected(newOppGrid,prev.opponentSsR,prev.opponentSsC);
-        finalOppGrid=pruned;
-        prunedCount=removed;
-        if(removed>0) pruneMsg=` +${removed} disconnected tile${removed!==1?'s':''} terminated!`;
-      }
-      const newAiTerritory=Math.max(0,prev.aiTerritory-(canDestroy?1+prunedCount:0));
-      const won=newAiTerritory===0;
-      const msg=won
-        ?`Attack from ${playerBase} → ${COLS[col]}${row+1} — AI's last territory destroyed! YOU WIN!`
-        :`Attack from ${playerBase} → ${COLS[col]}${row+1} — AI territory destroyed! AI territory: ${newAiTerritory}${pruneMsg}`;
-      return {...prev,hitGrid:newHit,opponentGrid:finalOppGrid,
-        aiTerritory:newAiTerritory,
-        activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
-        gameOver:won,winner:won?'you':prev.winner,
-        log:[{who:'you',text:msg},...prev.log],
-        turn:won?'you':'ai',
-        pendingToast:{text:won?'ATTACK! AI Defeated — YOU WIN!':`Attack hit! AI territory: ${newAiTerritory}${pruneMsg}`,color:won?'#44ff44':'#ff5566'}};
     });
   },[]);
 
@@ -1047,6 +1016,7 @@ function App(){
             return {...prev,inventory:consume(prev.inventory),selectedItem:null,
               p2:{...prev.p2,territory:newTerr},
               gameOver:won,winner:won?`p${prev.activePlayer}`:prev.winner,
+              pvpPendingPass:!won,
               log:[{who:`p${prev.activePlayer}`,text:`Used Pirates — stole 1 territory! Opponent: ${newTerr}${won?' — DEFEATED!':''}`},...prev.log],
               pendingToast:{text:won?'Pirates! Opponent defeated — YOU WIN!':`Pirates! Opponent territory: ${newTerr}`,color:'#aa6600'}};
           }
@@ -1054,6 +1024,7 @@ function App(){
           const won=newTerr===0;
           return {...prev,inventory:consume(prev.inventory),selectedItem:null,
             aiTerritory:newTerr,gameOver:won,winner:won?'you':prev.winner,
+            turn:won?'you':'ai',
             log:[{who:'you',text:`Used Pirates — stole 1 AI territory! AI territory: ${newTerr}${won?' — AI DEFEATED!':''}`},...prev.log],
             pendingToast:{text:won?'Pirates! AI has no territory — YOU WIN!':`Pirates! AI territory now: ${newTerr}`,color:'#aa6600'}};
         }
@@ -1065,6 +1036,38 @@ function App(){
           return {...prev,inventory:consume(prev.inventory),selectedItem:null,
             activeAction:'torpedo',viewMode:'hit',
             pendingToast:{text:'Torpedo armed — pick blast center coordinate',color:'#8855ff'}};
+        case 'probe': {
+          // Scan opponent grid for uncollected resources
+          const oppGrid=prev.opponentGrid;
+          const brList=[],srList=[],crList=[];
+          for(let r=0;r<12;r++) for(let c=0;c<12;c++){
+            const cell=oppGrid[r][c];
+            if(cell.type==='br') brList.push([r,c]);
+            else if(cell.type==='sr_res') srList.push([r,c]);
+            else if(cell.type==='cr') crList.push([r,c]);
+          }
+          const pick=arr=>arr.length?arr[Math.floor(Math.random()*arr.length)]:null;
+          let results=[];
+          const hasBR=brList.length>0;
+          if(hasBR){
+            const br=pick(brList); if(br) results.push(`BR at ${COLS[br[1]]}${br[0]+1}`);
+            const sr=pick(srList); if(sr) results.push(`SR at ${COLS[sr[1]]}${sr[0]+1}`);
+            const cr=pick(crList); if(cr) results.push(`CR at ${COLS[cr[1]]}${cr[0]+1}`);
+          } else {
+            // No BR — BR slot becomes SR, CR slot stays CR → 2 SR + 1 CR
+            const shuffled=[...srList].sort(()=>Math.random()-0.5).slice(0,2);
+            shuffled.forEach(([r,c])=>results.push(`SR at ${COLS[c]}${r+1}`));
+            const cr=pick(crList); if(cr) results.push(`CR at ${COLS[cr[1]]}${cr[0]+1}`);
+            if(!results.length) results.push('no resources detected');
+          }
+          const msg=`Resource Probe: ${results.join(' | ')}${hasBR?'':' (no BR on grid)'}`;
+          const who=prev.pvpMode?`p${prev.activePlayer}`:'you';
+          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+            turn:prev.aiMode?'ai':'you',
+            pvpPendingPass:prev.pvpMode,
+            log:[{who,text:msg},...prev.log],
+            pendingToast:{text:msg,color:'#aa88ff'}};
+        }
         default:
           return {...prev,pendingToast:{text:'Effect coming soon',color:'#555555'}};
       }
@@ -1100,6 +1103,8 @@ function App(){
       return {...prev,yourGrid:g,p2:newP2,stationMode:false,
         placementMode:bonusTiles>0,placementRemaining:(prev.placementRemaining||0)+bonusTiles,
         viewMode:bonusTiles>0?'your':prev.viewMode,
+        turn:prev.aiMode&&!bonusTiles?'ai':'you',
+        pvpPendingPass:prev.pvpMode&&!bonusTiles,
         pendingToast:{text:toastTxt,color:'#00aacc'}};
     });
   },[]);
@@ -1136,6 +1141,8 @@ function App(){
       const pruneNote=removed>0?` ${removed} disconnected tile${removed!==1?'s':''} terminated.`:'';
       return {...prev,yourGrid:pruned,territory:Math.max(1,newTerritory),
         p2:newP2,rerootMode:false,
+        turn:prev.aiMode?'ai':'you',
+        pvpPendingPass:prev.pvpMode,
         pendingToast:{text:`Added root at ${COLS[c]}${r+1}.${pruneNote}`,color:'#22aa55'},
         log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',
           text:`Used Add Root — extra root placed at ${COLS[c]}${r+1}.${pruneNote}`},...prev.log]};
@@ -1156,6 +1163,8 @@ function App(){
       if(prev.shieldedCells.some(s=>s.r===r&&s.c===c))
         return {...prev,pendingToast:{text:'Already shielded',color:'#ff4444'}};
       return {...prev,shieldedCells:[...prev.shieldedCells,{r,c}],shieldMode:false,
+        turn:prev.aiMode?'ai':'you',
+        pvpPendingPass:prev.pvpMode,
         pendingToast:{text:`${COLS[c]}${r+1} is now shielded!`,color:'#55aaff'}};
     });
   },[]);
@@ -1221,7 +1230,7 @@ function App(){
       }
       let msg;
       if(result==='cr'){placementMode=true;placementRemaining+=1;msg=`Laser: CR at ${COLS[col]}${row+1}! Place 1 tile.`;}
-      else if(result==='br'){placementMode=true;placementRemaining+=7;msg=`Laser: BR at ${COLS[col]}${row+1}! Place 7 tiles.`;}
+      else if(result==='br'){placementMode=true;placementRemaining+=5;msg=`Laser: BR at ${COLS[col]}${row+1}! Place 5 tiles.`;}
       else if(result==='sr'){sr+=1;msg=`Laser: SR at ${COLS[col]}${row+1}! SR +1.`;}
       else if(result==='territory') msg=`Laser: ${isHome?'hit opponent base — indestructible':'destroyed territory'} at ${COLS[col]}${row+1}!${pruneMsg}`;
       else if(result==='station') msg=`Laser: obliterated station tile at ${COLS[col]}${row+1}!`;
@@ -1278,7 +1287,7 @@ function App(){
           if(!isCenter&&result==='station')
             newOppGrid[tr][tc2]=mkCell('empty'); // torpedo outer ring destroys station tiles
           if(result==='cr'){placementMode=true;placementRemaining+=1;}
-          if(result==='br'){placementMode=true;placementRemaining+=7;}
+          if(result==='br'){placementMode=true;placementRemaining+=5;}
           if(result==='sr') sr+=1;
           if(result!=='miss') hits.push(`${COLS[tc2]}${tr+1}`);
         }
@@ -1340,6 +1349,22 @@ function App(){
 
   const vp=gs.placementMode?validPlacements(gs.yourGrid):new Set();
 
+  // Fog of war: each territory/starting/station tile reveals a 5×5 area on YOUR grid
+  const visibleCells=(()=>{
+    const vis=new Set();
+    const g=gs.yourGrid;
+    for(let r=0;r<12;r++) for(let c=0;c<12;c++){
+      const t=g[r][c].type;
+      if(t==='territory'||t==='starting'||t==='station'){
+        for(let dr=-2;dr<=2;dr++) for(let dc=-2;dc<=2;dc++){
+          const nr=r+dr,nc=c+dc;
+          if(nr>=0&&nr<12&&nc>=0&&nc<12) vis.add(nr*12+nc);
+        }
+      }
+    }
+    return vis;
+  })();
+
   // ── Cell Renderers ──────────────────────────────────────────────────────────
 
   function renderYour(cell,r,c){
@@ -1389,6 +1414,11 @@ function App(){
     if(isValid) return(
       <div key={c} className="cell c-valid" onClick={()=>placeTile(r,c)} title={`${COLS[c]}${r+1}`} {...mEnter}/>
     );
+
+    // Fog: hide cells outside territory vision range
+    if(!visibleCells.has(r*12+c)){
+      return <div key={c} className="cell c-fog" title={`${COLS[c]}${r+1}`} {...mEnter}/>;
+    }
 
     let cls='cell ';
     let inner=null;
@@ -1601,6 +1631,7 @@ function App(){
               ))
             }
           </div>
+
         </div>
       </div>
 
@@ -1671,6 +1702,16 @@ function App(){
             onClick={()=>openAction('search')}>Search</button>
           <button className={`btn btn-attack${gs.activeAction==='attack'?' btn-view on':''}`}
             onClick={()=>openAction('attack')}>Attack</button>
+          </>}
+          {gs.aiMode&&<>
+            <button className="btn" style={{background:'#081808',borderColor:'#1a4a1a',color:'#44cc44',fontSize:11,padding:'5px 10px'}}
+              onClick={()=>setGs(prev=>({...prev,placementMode:true,placementRemaining:(prev.placementRemaining||0)+1,actionMessage:'Cheat: place 1 territory tile.'}))}>
+              +1 CR
+            </button>
+            <button className="btn" style={{background:'#08081e',borderColor:'#1a1a44',color:'#8888ff',fontSize:11,padding:'5px 10px'}}
+              onClick={()=>setGs(prev=>({...prev,sr:prev.sr+1}))}>
+              +1 SR
+            </button>
           </>}
 
           {!gs.pvpPendingPass&&gs.activeAction&&gs.turn==='you'&&(<>
