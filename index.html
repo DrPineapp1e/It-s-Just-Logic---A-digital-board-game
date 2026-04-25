@@ -20,7 +20,7 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .grid-controls{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-shrink:0}
 .res-counter{display:flex;gap:10px;margin-bottom:8px;flex-shrink:0;align-items:center}
 .res-pill{display:flex;align-items:center;gap:5px;background:#080814;border:1px solid #1a1a30;border-radius:4px;padding:4px 10px;font-size:12px;font-weight:bold}
-.res-pill-lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px}
+.res-pill-lbl{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.5px}
 .res-cr{color:#33aa33;border-color:#1a3a1a}
 .res-br{color:#cc3333;border-color:#3a1a1a}
 .res-sr{color:#4444cc;border-color:#1a1a3a}
@@ -28,9 +28,9 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .grid-scroll{overflow:auto;flex:1}
 .grid-wrap{display:inline-block}
 .col-labels{display:flex;margin-left:26px;margin-bottom:2px}
-.col-lbl{width:var(--cell);text-align:center;font-size:10px;color:#444;font-weight:bold;letter-spacing:1px}
+.col-lbl{width:var(--cell);text-align:center;font-size:10px;color:#888;font-weight:bold;letter-spacing:1px}
 .grid-row{display:flex;align-items:center}
-.row-lbl{width:26px;height:var(--cell);font-size:10px;color:#444;text-align:right;padding-right:4px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end}
+.row-lbl{width:26px;height:var(--cell);font-size:10px;color:#888;text-align:right;padding-right:4px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end}
 
 /* CELLS */
 .cell{width:var(--cell);height:var(--cell);flex-shrink:0;border:1px solid #161624;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;position:relative;transition:background .1s,border-color .1s;user-select:none}
@@ -61,13 +61,17 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .c-station{background:#003a3a;border-color:#009999}
 .c-station-place{background:#001e2a!important;border-color:#00aacc!important;cursor:pointer!important}
 .c-station-place:hover{background:#002a38!important;box-shadow:inset 0 0 10px rgba(0,170,204,.25)}
+.c-silo{background:#1a0828;border-color:#7733cc;cursor:pointer}
+.c-silo:hover{background:#240c38!important;border-color:#aa55ff!important}
+.c-silo-pick{background:#0e0520!important;border-color:#7733cc!important;cursor:pointer!important}
+.c-silo-pick:hover{background:#180930!important;box-shadow:inset 0 0 10px rgba(119,51,204,.3)}
 .c-reroot-pick{background:#071e12!important;border-color:#22aa55!important;cursor:pointer!important}
 .c-reroot-pick:hover{background:#0d2e1c!important;box-shadow:inset 0 0 10px rgba(34,170,85,.22)}
 
 .cell-x{font-size:15px;font-weight:bold;line-height:1}
 .cell-sub{font-size:7px;color:rgba(255,255,255,.55);line-height:1;margin-top:1px}
 .cell-icon{font-size:13px;line-height:1}
-.x-miss{color:#444}
+.x-miss{color:#777}
 .x-cr{color:#44cc44}
 .x-br{color:#cc4444}
 .x-sr{color:#4444cc}
@@ -75,27 +79,27 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 
 /* MID PANEL */
 .mid{width:290px;background:#09090f;border-left:1px solid #14141e;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
-.mid-head{padding:9px 12px 5px;font-size:11px;color:#8888aa;text-transform:uppercase;letter-spacing:1px;flex-shrink:0;border-bottom:1px solid #1a1a28}
+.mid-head{padding:9px 12px 5px;font-size:11px;color:#aaaacc;text-transform:uppercase;letter-spacing:1px;flex-shrink:0;border-bottom:1px solid #1a1a28}
 .log-list{flex:0 1 auto;max-height:55%;overflow-y:auto;padding:4px 0}
 .log-entry{font-size:11px;padding:5px 12px;border-bottom:1px solid #0f0f18;line-height:1.5;word-break:break-word}
-.log-empty{font-size:11px;color:#555;font-style:italic;padding:8px 12px}
+.log-empty{font-size:11px;color:#888;font-style:italic;padding:8px 12px}
 .log-you{color:#99bbff}
 .log-opp{color:#ffaa77}
 .log-p2{color:#ff9944}
 .log-who{font-weight:bold;font-size:10px;letter-spacing:.5px;margin-right:5px}
 .notes-wrap{flex:1;display:flex;flex-direction:column;border-top:1px solid #1a1a28;min-height:0}
 .notes-inp{flex:1;background:transparent;border:none;color:#ccc;font-family:'Courier New',monospace;font-size:12px;padding:10px 12px;resize:none;outline:none;line-height:1.6}
-.notes-inp::placeholder{color:#444}
+.notes-inp::placeholder{color:#666}
 
 /* RIGHT PANEL */
 .right{width:210px;background:#0c0c18;border-left:1px solid #1a1a2a;padding:14px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex-shrink:0}
 .stat-card{background:#080814;border:1px solid #1a1a30;border-radius:6px;padding:10px 12px}
-.stat-name{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.stat-name{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
 .stat-val{font-size:28px;font-weight:bold}
 .sv-ter{color:#3aacac}
 .sv-sr{color:#7777ff}
-.sec-head{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.inv-empty{font-size:11px;color:#2a2a2a;font-style:italic}
+.sec-head{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.inv-empty{font-size:11px;color:#777;font-style:italic}
 .inv-item{background:#080814;border:1px solid #1a1a28;border-radius:4px;padding:7px 8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .inv-item.sel{border-color:#4040aa;background:#0c0c20}
 .inv-name{font-size:11px;color:#bbc}
@@ -114,7 +118,7 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .btn-attack:hover{background:#300c10;border-color:#882030}
 .btn-go{background:#082408;border-color:#206620;color:#44cc44;font-size:14px;padding:9px 20px}
 .btn-go:hover{background:#0c320c}
-.btn-cancel{background:#141414;border-color:#303030;color:#666;font-size:14px;padding:9px 14px}
+.btn-cancel{background:#141414;border-color:#303030;color:#999;font-size:14px;padding:9px 14px}
 .btn-cancel:hover{background:#1e1e1e}
 .btn-buy{padding:5px 10px;font-size:11px;background:#082408;border-color:#206620;color:#44cc44}
 .btn-buy:disabled{background:#101010;border-color:#1c1c1c;color:#333}
@@ -125,7 +129,7 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .bottom{background:#0c0c18;border-top:1px solid #1a1a2a;padding:8px 14px;display:flex;flex-direction:column;gap:5px;flex-shrink:0}
 .bottom-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .action-form{display:flex;align-items:center;gap:8px;background:#080814;border:1px solid #22223a;border-radius:4px;padding:6px 14px}
-.action-lbl{font-size:14px;color:#666}
+.action-lbl{font-size:14px;color:#999}
 .coord-inp{background:transparent;border:none;color:#ccddff;font-family:inherit;font-size:16px;font-weight:bold;width:60px;outline:none;text-transform:uppercase}
 .err-txt{color:#ff4444;font-size:11px}
 .msg-txt{color:#8888ff;font-size:11px;padding:2px 0}
@@ -135,7 +139,7 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 /* START SCREEN */
 .start-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:32px;animation:fadeIn .4s ease}
 .start-title{font-size:48px;font-weight:bold;color:#8888ff;letter-spacing:4px;text-transform:uppercase}
-.start-sub{font-size:13px;color:#333;letter-spacing:3px;text-transform:uppercase;margin-top:6px;text-align:center}
+.start-sub{font-size:13px;color:#888;letter-spacing:3px;text-transform:uppercase;margin-top:6px;text-align:center}
 .btn-start{font-size:16px;padding:14px 48px;letter-spacing:2px;background:#0a0a20;border:1px solid #3a3a88;color:#8888ff;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:bold;text-transform:uppercase;transition:all .2s;min-width:220px}
 .btn-start:hover{background:#14143a;border-color:#6666cc;color:#aaaaff;box-shadow:0 0 24px rgba(100,100,255,.15)}
 .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:18px;animation:fadeIn .25s ease}
@@ -150,14 +154,14 @@ body{background:#08080f;color:#ddd;font-family:'Courier New',monospace;height:10
 .modal{background:#0c0c1a;border:1px solid #24244a;border-radius:8px;padding:20px;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto}
 .modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
 .modal-title{font-size:16px;font-weight:bold;color:#aaaa44}
-.modal-sub{font-size:11px;color:#444;margin-top:2px}
-.modal-close{background:none;border:none;color:#444;cursor:pointer;font-size:20px;line-height:1;padding:0}
-.modal-close:hover{color:#aaa}
+.modal-sub{font-size:11px;color:#888;margin-top:2px}
+.modal-close{background:none;border:none;color:#888;cursor:pointer;font-size:20px;line-height:1;padding:0}
+.modal-close:hover{color:#ccc}
 .shop-item{background:#08080e;border:1px solid #1a1a30;border-radius:6px;padding:12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
 .shop-body{flex:1}
 .shop-name{font-size:13px;font-weight:bold;color:#dde}
 .shop-cost{font-size:11px;color:#7777ff;margin:2px 0 5px}
-.shop-desc{font-size:11px;color:#666;line-height:1.45}
+.shop-desc{font-size:11px;color:#aaa;line-height:1.45}
 </style>
 </head>
 <body>
@@ -174,7 +178,7 @@ const SHOP_ITEMS = [
   { id:'laser',   name:'Laser Ablation',     cost:2, desc:"Destroys any tile on either grid. 2 uses per game. Wasted on empty tiles." },
   { id:'station', name:'Space Station',      cost:3, desc:"Place 1 station tile (cyan) anywhere on your grid. Collecting adjacent CRs works same as expanding. Max 7 station tiles total. When attacked, station size defends vs attacker territory — losing station tiles doesn't end the game." },
   { id:'addroot', name:'Add Root',            cost:4, desc:"Add an extra root to any territory or station tile — that tile becomes an additional starting point. Both the old root and the new one anchor your territory. Tiles connected to either root are safe. (If you root onto a station tile it leaves the station pool.)" },
-  { id:'torpedo', name:'Antimatter Torpedo', cost:7, desc:"3x3 blast. Center hits territory = instant win. Outer ring destroys what it hits." },
+  { id:'torpedo', name:'Antimatter Torpedo', cost:7, desc:"Place a torpedo silo tile adjacent to your territory (costs your turn). Click the silo anytime to fire a 3×3 blast — center hits territory = instant win, outer ring destroys tiles. Silo vanishes after firing." },
   { id:'probe',   name:'Resource Probe',    cost:4, desc:"Reveals 3 resource coordinates on the opponent's grid: one BR (or SR if no BR), one SR, and one CR (or SR if no BR). Using any item costs 1 move." },
 ];
 
@@ -296,6 +300,19 @@ function countStation(grid){
   let n=0;
   for(let r=0;r<12;r++) for(let c=0;c<12;c++) if(grid[r][c].type==='station') n++;
   return n;
+}
+
+function validSiloPositions(grid){
+  const s=new Set();
+  for(let r=0;r<12;r++) for(let c=0;c<12;c++){
+    const t=grid[r][c].type;
+    if(t==='territory'||t==='starting'||t==='station'){
+      ortho(r,c).forEach(([nr,nc])=>{
+        if(grid[nr][nc].type==='empty') s.add(`${nr},${nc}`);
+      });
+    }
+  }
+  return s;
 }
 
 // BFS from starting tile; any territory tile NOT reachable is pruned.
@@ -532,6 +549,7 @@ function swapPvpPlayers(prev){
     placementRemaining:prev.placementRemaining,
     stationMode:false,rerootMode:false,
     shieldMode:false,shieldedCells:prev.shieldedCells,
+    siloPlaceMode:false,siloActive:null,
   };
   return {
     ...prev,
@@ -549,8 +567,9 @@ function swapPvpPlayers(prev){
     rerootMode:p2.rerootMode||false,
     shieldMode:p2.shieldMode||false,
     shieldedCells:p2.shieldedCells||[],
+    siloPlaceMode:p2.siloPlaceMode||false,siloActive:p2.siloActive||null,
     p2:snap,
-    activeAction:null,actionInput:'',actionError:'',actionMessage:'',
+    activeAction:null,actionInput:'',actionError:'',actionMessage:'',actionWarned:null,
     activePlayer:prev.activePlayer===1?2:1,
     pvpPendingPass:false,
     playerStunned:prev.opponentStunned,
@@ -611,6 +630,8 @@ function initGame(mode=false){
     pendingToast: null,
     gameOver: false, winner: null,
     shieldedCells: [], shieldMode: false,
+    siloPlaceMode: false, siloActive: null,
+    actionWarned: null,
     pvpMode, activePlayer: pvpMode?1:null, p2, pvpPendingPass: false, opponentStunned: false,
   };
 }
@@ -682,8 +703,8 @@ function App(){
   },[gs.pendingToast]);
 
   useEffect(()=>{
-    if(gs.activeAction && inputRef.current) inputRef.current.focus();
-  },[gs.activeAction]);
+    if((gs.activeAction||gs.siloActive) && inputRef.current) inputRef.current.focus();
+  },[gs.activeAction,gs.siloActive]);
 
   useEffect(()=>{
     if(!gs.aiMode||gs.turn!=='ai'||gs.gameOver) return;
@@ -777,7 +798,7 @@ function App(){
   const submitSearch=useCallback(()=>{
     setGs(prev=>{
       if(prev.playerStunned){
-        return {...prev,playerStunned:false,activeAction:null,actionInput:'',actionError:'',
+        return {...prev,playerStunned:false,activeAction:null,actionInput:'',actionError:'',actionWarned:null,
           turn:prev.aiMode?'ai':'you',
           pvpPendingPass:prev.pvpMode,
           log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:'Stunned by EMP — turn lost!'},...prev.log],
@@ -793,14 +814,16 @@ function App(){
           newHit[row][col]={result:'miss'};
           const newP2={...prev.p2,shieldedCells:prev.p2.shieldedCells.filter(s=>!(s.r===row&&s.c===col))};
           const msg=`Searched ${COLS[col]}${row+1} — Miss (shielded).`;
-          return {...prev,hitGrid:newHit,p2:newP2,activeAction:null,actionInput:'',actionError:'',
+          return {...prev,hitGrid:newHit,p2:newP2,activeAction:null,actionInput:'',actionError:'',actionWarned:null,
             pvpPendingPass:true,
             log:[{who:`p${prev.activePlayer}`,text:msg},...prev.log],
             pendingToast:{text:'Shielded! That tile was protected.',color:'#55aaff'}};
         }
       }
-      if(prev.hitGrid[row][col]!==null)
-        return {...prev,actionError:`${COLS[col]}${row+1} already searched.`};
+      if(prev.hitGrid[row][col]!==null){
+        if(prev.actionWarned!==prev.actionInput)
+          return {...prev,actionError:`${COLS[col]}${row+1} already searched — press Go/Enter again to search anyway.`,actionWarned:prev.actionInput};
+      }
 
       const newHit=prev.hitGrid.map(r=>[...r]);
       const oppCell=prev.opponentGrid[row][col];
@@ -830,6 +853,7 @@ function App(){
         actionInput: '',
         actionError: '',
         actionMessage: msg,
+        actionWarned: null,
         sr, yourGrid, placementMode, placementRemaining,
         log: [{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:msg},...prev.log],
         // If CR/BR found, player places tiles first — AI turn only after placement is done
@@ -853,8 +877,10 @@ function App(){
       const coord=parseCoord(prev.actionInput);
       if(!coord) return {...prev,actionError:'Invalid. Use A1–L12 (e.g. D4)'};
       const {row,col}=coord;
-      if(prev.hitGrid[row][col]!==null)
-        return {...prev,actionError:`${COLS[col]}${row+1} already targeted.`};
+      if(prev.hitGrid[row][col]!==null){
+        if(prev.actionWarned!==prev.actionInput)
+          return {...prev,actionError:`${COLS[col]}${row+1} already targeted — press Go/Enter again to attack anyway.`,actionWarned:prev.actionInput};
+      }
       const playerBase=`${COLS[prev.ssC]}${prev.ssR+1}`;
       const oppCell=prev.opponentGrid[row][col];
       const isTerritory=oppCell&&(oppCell.type==='territory'||oppCell.type==='starting');
@@ -870,7 +896,7 @@ function App(){
           newHit[row][col]={result:'miss'};
           const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — station held! (station: ${defStationSize}, your territory: ${prev.territory})`;
           return {...prev,hitGrid:newHit,
-            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
             log:[{who,text:msg},...prev.log],
             turn:prev.aiMode?'ai':'you',
             pvpPendingPass:prev.pvpMode,
@@ -886,14 +912,14 @@ function App(){
           const newP2={...prev.p2,yourGrid:newP2YG};
           const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — station tile destroyed! (station now: ${defStationSize-1})`;
           return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,p2:newP2,
-            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
             log:[{who,text:msg},...prev.log],
             pvpPendingPass:true,
             pendingToast:{text:`Station tile destroyed! Opponent station: ${defStationSize-1}`,color:'#00aacc'}};
         }
         const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — opponent station tile destroyed!`;
         return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,
-          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
           log:[{who:'you',text:msg},...prev.log],
           turn:'ai',
           pendingToast:{text:'Station tile destroyed!',color:'#00aacc'}};
@@ -904,7 +930,7 @@ function App(){
         newHit[row][col]={result:'miss'};
         const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — no territory here, miss.`;
         return {...prev,hitGrid:newHit,
-          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
           log:[{who,text:msg},...prev.log],
           turn:prev.aiMode?'ai':'you',
           pvpPendingPass:prev.pvpMode,
@@ -922,14 +948,14 @@ function App(){
         const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — your territory (${prev.territory}) overwhelms opponent (${oppTerritory})! VICTORY!`;
         if(prev.pvpMode){
           return {...prev,hitGrid:newHit,
-            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
             gameOver:true,winner:who,
             log:[{who,text:msg},...prev.log],
             pvpPendingPass:false,
             pendingToast:{text:`Player ${prev.activePlayer} wins — territory superiority!`,color:'#44ff44'}};
         }
         return {...prev,hitGrid:newHit,
-          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
           gameOver:true,winner:'you',
           log:[{who:'you',text:msg},...prev.log],
           turn:'you',
@@ -940,14 +966,14 @@ function App(){
         const msg=`Attack from ${playerBase} → ${COLS[col]}${row+1} — opponent's territory (${oppTerritory}) repels yours (${prev.territory})! DEFEATED!`;
         if(prev.pvpMode){
           return {...prev,hitGrid:newHit,
-            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+            activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
             gameOver:true,winner:loserWinner,
             log:[{who,text:msg},...prev.log],
             pvpPendingPass:false,
             pendingToast:{text:`Player ${prev.activePlayer} loses — attack repelled!`,color:'#cc4444'}};
         }
         return {...prev,hitGrid:newHit,
-          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,
+          activeAction:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
           gameOver:true,winner:'ai',
           log:[{who:'you',text:msg},...prev.log],
           turn:'you',
@@ -1029,13 +1055,13 @@ function App(){
             pendingToast:{text:won?'Pirates! AI has no territory — YOU WIN!':`Pirates! AI territory now: ${newTerr}`,color:'#aa6600'}};
         }
         case 'laser':
-          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
+          return {...prev,selectedItem:null,
             activeAction:'laser',viewMode:'hit',
             pendingToast:{text:'Laser armed — pick a target coordinate',color:'#ff4488'}};
         case 'torpedo':
-          return {...prev,inventory:consume(prev.inventory),selectedItem:null,
-            activeAction:'torpedo',viewMode:'hit',
-            pendingToast:{text:'Torpedo armed — pick blast center coordinate',color:'#8855ff'}};
+          return {...prev,selectedItem:null,
+            siloPlaceMode:true,viewMode:'your',
+            pendingToast:{text:'Torpedo Silo: click a highlighted cell adjacent to your territory',color:'#8855ff'}};
         case 'probe': {
           // Scan opponent grid for uncollected resources
           const oppGrid=prev.opponentGrid;
@@ -1174,8 +1200,126 @@ function App(){
       pendingToast:{text:'Shield cancelled',color:'#555555'}}));
   },[]);
 
+  // ── Torpedo Silo ─────────────────────────────────────────────────────────────
+
+  const placeSilo=useCallback((r,c)=>{
+    setGs(prev=>{
+      if(!prev.siloPlaceMode) return prev;
+      const vsp=validSiloPositions(prev.yourGrid);
+      if(!vsp.has(`${r},${c}`)) return prev;
+      const torpItem=prev.inventory.find(i=>i.id==='torpedo');
+      if(!torpItem) return {...prev,siloPlaceMode:false};
+      const newInv=prev.inventory.filter(i=>i.iid!==torpItem.iid);
+      const g=cloneGrid(prev.yourGrid);
+      g[r][c]={type:'silo',collected:false,opponentSearched:false};
+      return {...prev,
+        yourGrid:g,inventory:newInv,selectedItem:null,siloPlaceMode:false,
+        turn:prev.aiMode?'ai':'you',
+        pvpPendingPass:prev.pvpMode,
+        log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:`Torpedo silo placed at ${COLS[c]}${r+1}. Click it to fire.`},...prev.log],
+        pendingToast:{text:`Torpedo Silo placed at ${COLS[c]}${r+1}! Click it anytime to fire.`,color:'#8855ff'}
+      };
+    });
+  },[]);
+
+  const cancelSiloPlace=useCallback(()=>{
+    setGs(prev=>({...prev,siloPlaceMode:false,
+      pendingToast:{text:'Torpedo Silo placement cancelled',color:'#555555'}}));
+  },[]);
+
+  const openSiloAction=useCallback((r,c)=>{
+    setGs(prev=>({...prev,siloActive:{r,c},actionInput:'',actionError:'',actionWarned:null,activeAction:null}));
+  },[]);
+
+  const closeSiloAction=useCallback(()=>{
+    setGs(prev=>({...prev,siloActive:null,actionInput:'',actionError:'',actionWarned:null}));
+  },[]);
+
+  const submitSilo=useCallback(()=>{
+    setGs(prev=>{
+      if(!prev.siloActive) return prev;
+      const coord=parseCoord(prev.actionInput);
+      if(!coord) return {...prev,actionError:'Invalid. Use A1–L12'};
+      const {row:cr,col:cc}=coord;
+      const {r:siloR,c:siloC}=prev.siloActive;
+      let newHit=prev.hitGrid.map(r=>[...r]);
+      let newOppGrid=cloneGrid(prev.opponentGrid);
+      let {sr,placementMode,placementRemaining}=prev;
+      const hits=[];
+      let won=false;
+      // Center win check — always fires regardless of prior hitGrid state
+      const centerCell=newOppGrid[cr][cc];
+      if(centerCell.type==='territory'||centerCell.type==='starting'){
+        newHit[cr][cc]={result:'territory'};
+        won=true;
+      }
+      if(!won){
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const tr=cr+dr,tc2=cc+dc;
+          const isCenter=dr===0&&dc===0;
+          if(!inBounds(tr,tc2)||newHit[tr][tc2]!==null) continue;
+          const oppCell=newOppGrid[tr][tc2];
+          const result=
+            oppCell.type==='cr'&&!oppCell.collected?'cr':
+            oppCell.type==='br'&&!oppCell.collected?'br':
+            oppCell.type==='sr_res'&&!oppCell.collected?'sr':
+            (oppCell.type==='starting'||oppCell.type==='territory')?'territory':
+            oppCell.type==='station'?'station':'miss';
+          newHit[tr][tc2]={result};
+          if(result==='cr'||result==='br'||result==='sr')
+            newOppGrid[tr][tc2]={...newOppGrid[tr][tc2],type:'empty',collected:true};
+          if(!isCenter&&result==='territory'&&oppCell.type!=='starting')
+            newOppGrid[tr][tc2]=mkCell('empty');
+          if(!isCenter&&result==='station')
+            newOppGrid[tr][tc2]=mkCell('empty');
+          if(result==='cr'){placementMode=true;placementRemaining+=1;}
+          if(result==='br'){placementMode=true;placementRemaining+=5;}
+          if(result==='sr') sr+=1;
+          if(result!=='miss') hits.push(`${COLS[tc2]}${tr+1}`);
+        }
+        const ssR2=prev.pvpMode?prev.p2.ssR:prev.opponentSsR;
+        const ssC2=prev.pvpMode?prev.p2.ssC:prev.opponentSsC;
+        const {grid:prunedOpp,removed:torpPruned}=pruneDisconnected(newOppGrid,ssR2,ssC2);
+        newOppGrid=prunedOpp;
+        if(torpPruned>0) hits.push(`[+${torpPruned} disconnected]`);
+      }
+      let newP2=prev.p2;
+      if(prev.pvpMode&&prev.p2&&!won){
+        const newP2YG=cloneGrid(prev.p2.yourGrid);
+        for(let pr=0;pr<12;pr++) for(let pc=0;pc<12;pc++){
+          if(newOppGrid[pr][pc].type==='empty'&&(newP2YG[pr][pc].type==='territory'||newP2YG[pr][pc].type==='station'))
+            newP2YG[pr][pc]=mkCell('empty');
+        }
+        let p2Terr=0;
+        for(let pr=0;pr<12;pr++) for(let pc=0;pc<12;pc++){
+          if(newP2YG[pr][pc].type==='territory'||newP2YG[pr][pc].type==='starting') p2Terr++;
+        }
+        newP2={...prev.p2,yourGrid:newP2YG,territory:p2Terr};
+      }
+      // Remove silo tile
+      const newYourGrid=cloneGrid(prev.yourGrid);
+      newYourGrid[siloR][siloC]=mkCell('empty');
+      const siloBase=`${COLS[siloC]}${siloR+1}`;
+      const torpWinner=prev.pvpMode?`p${prev.activePlayer}`:'you';
+      const msg=won
+        ?`Torpedo from silo at ${siloBase} — direct hit on enemy territory at ${COLS[cc]}${cr+1}! ${prev.pvpMode?`Player ${prev.activePlayer} wins!`:'YOU WIN!'}`
+        :`Torpedo from silo at ${siloBase} targeting ${COLS[cc]}${cr+1}! Hits: ${hits.length?hits.join(', '):'none'}.`;
+      return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,p2:newP2,yourGrid:newYourGrid,
+        siloActive:null,actionInput:'',actionError:'',actionMessage:msg,actionWarned:null,
+        sr,placementMode,placementRemaining,
+        gameOver:won,winner:won?torpWinner:prev.winner,
+        log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:msg},...prev.log],
+        turn:prev.aiMode&&!won&&!placementMode?'ai':'you',
+        pvpPendingPass:prev.pvpMode&&!won&&!placementMode,
+        pendingToast:{text:won?`TORPEDO WIN! ${prev.pvpMode?`Player ${prev.activePlayer} wins!`:'YOU WIN!'}`:msg,color:won?'#44ff44':'#8855ff'}};
+    });
+  },[]);
+
   const submitLaser=useCallback(()=>{
     setGs(prev=>{
+      const laserItem=prev.inventory.find(i=>i.id==='laser');
+      if(!laserItem) return prev;
+      const consumeLaser=inv=>inv.filter(i=>i.iid!==laserItem.iid);
       const coord=parseCoord(prev.actionInput);
       if(!coord) return {...prev,actionError:'Invalid. Use A1–L12'};
       const {row,col}=coord;
@@ -1239,7 +1383,8 @@ function App(){
       const logMsg=`${msg} (fired from ${playerBase})`;
       const tc=result==='cr'?'#33aa33':result==='br'?'#cc3333':result==='sr'?'#7777ff':result==='territory'?'#ff4488':result==='station'?'#00aacc':'#555555';
       return {...prev,hitGrid:newHit,opponentGrid:newOppGrid,p2:newP2,
-        activeAction:null,actionInput:'',actionError:'',actionMessage:logMsg,
+        inventory:consumeLaser(prev.inventory),selectedItem:null,
+        activeAction:null,actionInput:'',actionError:'',actionMessage:logMsg,actionWarned:null,
         sr,placementMode,placementRemaining,
         log:[{who:prev.pvpMode?`p${prev.activePlayer}`:'you',text:logMsg},...prev.log],
         // Laser may collect CR/BR — player places tiles first, then AI's turn
@@ -1332,22 +1477,35 @@ function App(){
   const set_=(k,v)=>setGs(p=>({...p,...(typeof k==='string'?{[k]:v}:k)}));
   const openAction=t=>{
     const next=gs.activeAction===t?null:t;
-    set_({activeAction:next,actionInput:'',actionError:'',actionMessage:'',
-      pendingToast:next?{text:`${next==='search'?'Search':'Attack'} mode`,color:'#667788'}:{text:'Action cancelled',color:'#444444'}});
+    setGs(p=>({...p,activeAction:next,siloActive:null,actionInput:'',actionError:'',actionMessage:'',actionWarned:null,
+      pendingToast:next?{text:`${next==='search'?'Search':'Attack'} mode`,color:'#667788'}:{text:'Action cancelled',color:'#444444'}}));
   };
-  const closeAction=()=>set_({activeAction:null,actionInput:'',actionError:'',pendingToast:{text:'Action cancelled',color:'#444444'}});
-  const onInput=v=>set_({actionInput:v.toUpperCase(),actionError:''});
+  const closeAction=()=>set_({activeAction:null,actionInput:'',actionError:'',actionWarned:null,pendingToast:{text:'Action cancelled',color:'#444444'}});
+  const onInput=v=>{
+    const val=v.toUpperCase();
+    const coord=parseCoord(val);
+    let autoWarn='';
+    if(coord&&(gs.activeAction==='search'||gs.activeAction==='attack')){
+      if(gs.hitGrid[coord.row][coord.col]!==null)
+        autoWarn=`${val} already searched — press Go/Enter again to proceed.`;
+    }
+    setGs(p=>({...p,actionInput:val,actionError:autoWarn,actionWarned:autoWarn?val:null}));
+  };
   const onKey=e=>{
     if(e.key==='Enter'){
       if(gs.activeAction==='search') submitSearch();
       else if(gs.activeAction==='attack') submitAttack();
       else if(gs.activeAction==='laser') submitLaser();
-      else if(gs.activeAction==='torpedo') submitTorpedo();
+      else if(gs.siloActive) submitSilo();
     }
-    if(e.key==='Escape') closeAction();
+    if(e.key==='Escape'){
+      if(gs.siloActive) closeSiloAction();
+      else closeAction();
+    }
   };
 
   const vp=gs.placementMode?validPlacements(gs.yourGrid):new Set();
+  const vsp=gs.siloPlaceMode?validSiloPositions(gs.yourGrid):new Set();
 
   // Fog of war: each territory/starting/station tile reveals a 5×5 area on YOUR grid
   const visibleCells=(()=>{
@@ -1372,6 +1530,14 @@ function App(){
     const isValid=gs.placementMode&&vp.has(key);
     const isHovered=gs.placementMode&&hoverCell&&hoverCell.r===r&&hoverCell.c===c;
     const mEnter=gs.placementMode?{onMouseEnter:()=>setHoverCell({r,c})}:{};
+
+    if(gs.siloPlaceMode){
+      if(vsp.has(`${r},${c}`)) return(
+        <div key={c} className="cell c-silo-pick" onClick={()=>placeSilo(r,c)} title={`${COLS[c]}${r+1} — place torpedo silo here`}>
+          <span style={{color:'#aa66ff',fontSize:16,lineHeight:1}}>⊕</span>
+        </div>
+      );
+    }
 
     if(gs.stationMode){
       // New station mode: place on any empty cell
@@ -1460,6 +1626,18 @@ function App(){
           ?<span style={{fontSize:10,color:'#55aaff',lineHeight:1}}>🛡</span>
           :<span style={{color:'#00cccc',fontSize:13,lineHeight:1}}>◈</span>;
         break;
+      }
+      case 'silo': {
+        const isActiveSilo=gs.siloActive&&gs.siloActive.r===r&&gs.siloActive.c===c;
+        return(
+          <div key={c} className={`cell c-silo${isActiveSilo?' c-station-sel':''}`}
+            onClick={()=>!gs.siloPlaceMode&&openSiloAction(r,c)}
+            title={`${COLS[c]}${r+1} — Torpedo Silo${isActiveSilo?' (targeting…)':(gs.siloPlaceMode?'':' — click to fire')}`}
+            {...mEnter}>
+            <span style={{color:isActiveSilo?'#cc88ff':'#aa66ff',fontSize:14,lineHeight:1}}>⊕</span>
+            <span style={{fontSize:6,color:'rgba(180,130,255,.65)',lineHeight:1,marginTop:1}}>SILO</span>
+          </div>
+        );
       }
       default:
         cls+='c-empty';
@@ -1642,7 +1820,7 @@ function App(){
             Place territory: {gs.placementRemaining} remaining — click a highlighted square
           </div>
         )}
-        {selInvItem&&!gs.stationMode&&(
+        {selInvItem&&!gs.stationMode&&!gs.siloPlaceMode&&!gs.activeAction&&(
           <div className="sel-banner" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
             <span style={{fontSize:11}}>
               {selInvItem.name} — {
@@ -1652,7 +1830,7 @@ function App(){
                 selInvItem.id==='addroot'?'add an extra root to any territory or station tile.':
                 selInvItem.id==='pirates'?'steal 1 territory tile from opponent.':
                 selInvItem.id==='laser'?'destroy any tile on either grid.':
-                selInvItem.id==='torpedo'?'3×3 blast centered on a coordinate.':
+                selInvItem.id==='torpedo'?'place a torpedo silo adjacent to your territory.':
                 'choose a target.'
               }
             </span>
@@ -1663,6 +1841,12 @@ function App(){
           <div className="place-banner" style={{borderColor:'#009999',color:'#00cccc',display:'flex',alignItems:'center',gap:10}}>
             <span>Space Station: click any empty cell to place a station tile (station: {countStation(gs.yourGrid)}/7)</span>
             <button className="btn btn-cancel" style={{padding:'4px 10px',fontSize:11}} onClick={cancelStation}>Cancel</button>
+          </div>
+        )}
+        {gs.siloPlaceMode&&(
+          <div className="place-banner" style={{borderColor:'#7733cc',color:'#aa66ff',display:'flex',alignItems:'center',gap:10}}>
+            <span>Torpedo Silo: click a highlighted cell adjacent to your territory to place</span>
+            <button className="btn btn-cancel" style={{padding:'4px 10px',fontSize:11}} onClick={cancelSiloPlace}>Cancel</button>
           </div>
         )}
         {gs.rerootMode&&(
@@ -1703,7 +1887,7 @@ function App(){
           <button className={`btn btn-attack${gs.activeAction==='attack'?' btn-view on':''}`}
             onClick={()=>openAction('attack')}>Attack</button>
           </>}
-          {gs.aiMode&&<>
+          {!gs.aiMode&&!gs.pvpMode&&<>
             <button className="btn" style={{background:'#081808',borderColor:'#1a4a1a',color:'#44cc44',fontSize:11,padding:'5px 10px'}}
               onClick={()=>setGs(prev=>({...prev,placementMode:true,placementRemaining:(prev.placementRemaining||0)+1,actionMessage:'Cheat: place 1 territory tile.'}))}>
               +1 CR
@@ -1717,7 +1901,7 @@ function App(){
           {!gs.pvpPendingPass&&gs.activeAction&&gs.turn==='you'&&(<>
             <div className="action-form">
               <span className="action-lbl">
-                {gs.activeAction==='search'?'Search':gs.activeAction==='attack'?'Attack':gs.activeAction==='laser'?'Laser':'Torpedo'}
+                {gs.activeAction==='search'?'Search':gs.activeAction==='attack'?'Attack':'Laser'}
               </span>
               <input ref={inputRef} className="coord-inp"
                 value={gs.actionInput}
@@ -1726,8 +1910,21 @@ function App(){
                 placeholder="D4" maxLength={3}/>
             </div>
             <button className="btn btn-go"
-              onClick={gs.activeAction==='search'?submitSearch:gs.activeAction==='attack'?submitAttack:gs.activeAction==='laser'?submitLaser:submitTorpedo}>Go</button>
+              onClick={gs.activeAction==='search'?submitSearch:gs.activeAction==='attack'?submitAttack:submitLaser}>Go</button>
             <button className="btn btn-cancel" onClick={closeAction}>✕</button>
+            {gs.actionError&&<span className="err-txt">{gs.actionError}</span>}
+          </>)}
+          {gs.siloActive&&!gs.activeAction&&gs.turn==='you'&&(<>
+            <div className="action-form" style={{borderColor:'#7733cc'}}>
+              <span className="action-lbl" style={{color:'#aa66ff'}}>Silo</span>
+              <input ref={inputRef} className="coord-inp"
+                value={gs.actionInput}
+                onChange={e=>onInput(e.target.value)}
+                onKeyDown={onKey}
+                placeholder="D4" maxLength={3}/>
+            </div>
+            <button className="btn btn-go" style={{borderColor:'#7733cc',color:'#aa66ff'}} onClick={submitSilo}>Fire</button>
+            <button className="btn btn-cancel" onClick={closeSiloAction}>✕</button>
             {gs.actionError&&<span className="err-txt">{gs.actionError}</span>}
           </>)}
         </div>
